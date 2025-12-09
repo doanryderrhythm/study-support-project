@@ -3,6 +3,7 @@ package com.example.studysupportproject;
 import android.annotation.SuppressLint;
 import android.os.StrictMode;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -12,7 +13,7 @@ public class ConSQL {
     @SuppressLint("NewApi")
     public Connection conclass()
     {
-        String ip = "127.0.0.1", port = "1433", db = "Mobile_app", username="mobile_user", password="mobilepassword";
+        String ip = "10.0.2.2", port = "1433", db = "Mobile_app", username="mobile_user", password="mobilepassword";
 
         StrictMode.ThreadPolicy a = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(a);

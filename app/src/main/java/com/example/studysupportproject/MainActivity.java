@@ -2,6 +2,8 @@ package com.example.studysupportproject;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +17,7 @@ import java.sql.Statement;
 
 public class MainActivity extends AppCompatActivity {
     Connection connection;
+    TextView middleTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,19 +31,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ConSQL c = new ConSQL();
-        connection = c.conclass();
-        if (c != null) {
+        Connection connection = c.conclass();
+        if (connection != null) {
+            Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
             try {
-                String sqlstatement = "Select * from dbo.grades";
                 Statement smt = connection.createStatement();
-                ResultSet set = smt.executeQuery(sqlstatement);
-                while (set.next()) {
+                ResultSet set = smt.executeQuery("SELECT * FROM dbo.grades");
 
-                }
                 connection.close();
-            }
-            catch (Exception e) {
-                Log.e("Error: ", e.getMessage());
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
             }
         }
     }
