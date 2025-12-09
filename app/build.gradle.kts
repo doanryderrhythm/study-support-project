@@ -37,6 +37,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(files("C:\\Users\\RyderRhythm\\AndroidStudioProjects\\StudySupportProject\\app\\libs\\jtds-1.3.1.jar"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
