@@ -16,9 +16,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 public class MainActivity extends AppCompatActivity {
-    Connection connection;
-    TextView middleTextView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,8 +33,10 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
             try {
                 Statement smt = connection.createStatement();
-                ResultSet set = smt.executeQuery("SELECT * FROM dbo.grades");
-
+                ResultSet set = smt.executeQuery("SELECT * FROM dbo.roles");
+                while (set.next()) {
+                    Log.d("Connected", set.getString(1));
+                }
                 connection.close();
             } catch (Exception e) {
                 Log.e("Error", e.getMessage());
