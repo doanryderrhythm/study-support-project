@@ -1,7 +1,7 @@
 **MANDATORY TOOLS**
-- Android Studio
-- Microsoft's SQL Server Management Studio
-- Microsoft's SQL Server Configuration Manager
+- [Android Studio](https://developer.android.com/studio?hl=vi)
+- [Microsoft's SQL Server Management Studio](https://learn.microsoft.com/vi-vn/ssms/install/install)
+- [Microsoft's SQL Server Configuration Manager](https://learn.microsoft.com/en-us/sql/tools/configuration-manager/sql-server-configuration-manager?view=sql-server-ver17)
 
 **INSTALL INSTRUCTIONS**
 1. INSTALL APPLICATIONS
