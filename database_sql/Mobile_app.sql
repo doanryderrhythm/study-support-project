@@ -1,7 +1,28 @@
-﻿USE Mobile_app;
+﻿CREATE DATABASE Mobile_app;
+USE Mobile_app;
 GO
 
 
+
+-- Bảng trường
+CREATE TABLE schools (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    school_name NVARCHAR(50) UNIQUE NOT NULL
+)
+
+-- Bảng lớp
+CREATE TABLE classes (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    school_id INT NOT NULL,
+    class_name NVARCHAR(50) NOT NULL,
+    FOREIGN KEY (school_id) REFERENCES schools(id)
+)
+
+-- Bảng học kỳ
+CREATE TABLE semesters (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    semester_name NVARCHAR(50) NOT NULL
+)
 
 CREATE TABLE users (
     id INT IDENTITY(1,1) PRIMARY KEY,
@@ -10,12 +31,14 @@ CREATE TABLE users (
     email NVARCHAR(100),
     full_name NVARCHAR(100),
     date_of_birth DATE,
+    class_id INT NOT NULL,
     phone NVARCHAR(20),
     address NVARCHAR(255),
     avatar NVARCHAR(255),
     is_active BIT DEFAULT 1,
     created_at DATETIME2 DEFAULT GETDATE(),
-    updated_at DATETIME2 DEFAULT GETDATE()
+    updated_at DATETIME2 DEFAULT GETDATE(),
+    FOREIGN KEY (class_id) REFERENCES classes(id)
 );
 
 -- Bảng vai trò
@@ -73,17 +96,20 @@ CREATE TABLE posts (
 CREATE TABLE grades (
     id INT IDENTITY(1,1) PRIMARY KEY,
     student_id INT NOT NULL,
+    class_id INT NOT NULL,
     subject_name NVARCHAR(100) NOT NULL,
     grade_value DECIMAL(5,2) NOT NULL,
     grade_type NVARCHAR(50) DEFAULT N'midterm', 
-    semester NVARCHAR(50),
+    semester_id INT NOT NULL,
     school_year NVARCHAR(20),
     teacher_id INT,
     notes NTEXT,
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE(),
     FOREIGN KEY (student_id) REFERENCES users(id),
-    FOREIGN KEY (teacher_id) REFERENCES users(id)
+    FOREIGN KEY (teacher_id) REFERENCES users(id),
+    FOREIGN KEY (class_id) REFERENCES classes(id),
+    FOREIGN KEY (semester_id) REFERENCES semesters(id)
 );
 
 -- Bảng lịch cá nhân 
@@ -196,9 +222,17 @@ WHERE r.role_name = N'student'
 AND p.permission_name IN (N'view_posts', N'view_grades', N'view_schedule', 
                          N'view_personal_calendar', N'password_reset', N'account_security');
 
+-- Tạo trường
+INSERT INTO schools (school_name)
+VALUES (N'Trường Đại học UIT')
+
+-- Tạo lớp
+INSERT INTO classes (class_name, school_id)
+VALUES (N'SE114', '1')
+
 -- Tạo tài khoản admin
-INSERT INTO users (username, password, email, full_name) 
-VALUES (N'Danh', N'danh123', N'danh123@school.edu.vn', N'Quản Trị Viên');
+INSERT INTO users (username, password, email, full_name, class_id) 
+VALUES (N'Danh', N'danh123', N'danh123@school.edu.vn', N'Quản Trị Viên', '1');
 
 -- Gán quyền admin
 INSERT INTO user_roles (user_id, role_id, granted_by) 
@@ -223,16 +257,17 @@ GO
 -- Stored Procedure nhập điểm
 CREATE PROCEDURE AddGrade
     @student_id INT,
+    @class_id INT,
     @subject_name NVARCHAR(100),
     @grade_value DECIMAL(5,2),
     @grade_type NVARCHAR(50),
-    @semester NVARCHAR(50),
+    @semester_id INT,
     @school_year NVARCHAR(20),
     @teacher_id INT
 AS
 BEGIN
-    INSERT INTO grades (student_id, subject_name, grade_value, grade_type, semester, school_year, teacher_id)
-    VALUES (@student_id, @subject_name, @grade_value, @grade_type, @semester, @school_year, @teacher_id);
+    INSERT INTO grades (student_id, class_id, subject_name, grade_value, grade_type, semester_id, school_year, teacher_id)
+    VALUES (@student_id, @class_id, @subject_name, @grade_value, @grade_type, @semester_id, @school_year, @teacher_id);
     
     SELECT SCOPE_IDENTITY() as grade_id;
 END;
@@ -241,22 +276,23 @@ GO
 -- Stored Procedure xem bảng điểm học sinh
 CREATE PROCEDURE GetStudentGrades
     @student_id INT,
-    @semester NVARCHAR(50) = NULL,
+    @semester_id INT = NULL,
     @school_year NVARCHAR(20) = NULL
 AS
 BEGIN
     SELECT 
         g.subject_name,
+        g.class_id,
         g.grade_value,
         g.grade_type,
-        g.semester,
+        g.semester_id,
         g.school_year,
         g.created_at,
         t.full_name as teacher_name
     FROM grades g
     LEFT JOIN users t ON g.teacher_id = t.id
     WHERE g.student_id = @student_id
-    AND (@semester IS NULL OR g.semester = @semester)
+    AND (@semester_id IS NULL OR g.semester_id = @semester_id)
     AND (@school_year IS NULL OR g.school_year = @school_year)
     ORDER BY g.subject_name, g.grade_type;
 END;
