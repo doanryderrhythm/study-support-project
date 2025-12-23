@@ -4,7 +4,9 @@
 - Microsoft's SQL Server Configuration Manager
 
 **INSTALL INSTRUCTIONS**
+1. INSTALL APPLICATIONS
 - Download and install Microsoft's SQL Server Management Studio and SQL Server Configuration Manager.
+2. CONFIGURE SQL DATA
 - Open SQL Server Management Studio. In order to access to SQL database, you need a specific account.
 - To create an account for testing, follow these steps:
   + In "Authentication", choose "Windows Authentication".
@@ -26,4 +28,18 @@
 - **(OPTIONAL)** Let's add the sample data to the database:
   + Import the Mobile_app_sample_data.sql to the application.
   + Execute the whole imported Mobile_app_sample_data.sql query to add the sample data.
+3. MODIFY SERVICES
+- Open SQL Server Configuration Manager.
+- First and foremost, let's change the IP port.
+  + Expand "SQL Server Network Configuration", and choose "Protocol for [YOUR SERVER NAME]".
+  + If you want to know what [YOUR SERVER NAME] is, check the server name in Connect window in SQL Server Management Studio.
+  + Double click on "TCP/IP".
+  + In "Protocol" tab, make sure to choose "Yes" in "Enabled" from "General" section.
+  + In "IP Addresses" tab, check the "IPAll" section and type "1433" in "TCP Port".
+  + Press Apply, then press OK.
+- Finally, time to restart the service.
+  + Click "SQL Server Services".
+  + Right click on "SQL Server ([YOUR SERVER NAME])".
+  + Press "Restart".
+4. RUN THE PROGRAM
 - Run the mobile program by connecting your device to Android Studio using USB cable, and press "Run".
