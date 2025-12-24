@@ -11,9 +11,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.StudySupportProject" >
         <activity
-            android:name=".HomeActivity"
-            android:exported="false" />
-        <activity
             android:name=".MyCoursesActivity"
             android:exported="false" />
         <activity
@@ -33,10 +30,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".MainActivity" />
-        <activity android:name=".NewAccountActivity" />
-        <activity android:name=".ForgotPasswordActivity" />
         <activity android:name=".OtpVerificationActivity" />
         <activity android:name=".ResetPasswordActivity" />
 
