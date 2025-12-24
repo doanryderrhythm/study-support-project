@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    android:id="@+id/main"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_gradient"
     android:padding="20dp"
-    tools:context=".ForgotPasswordActivity">
+    tools:context=".OtpVerificationActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,20 +20,20 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginTop="80dp"
+            android:layout_marginTop="60dp"
             android:layout_marginBottom="50dp">
 
             <ImageView
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:src="@drawable/ic_lock_reset"
+                android:src="@drawable/ic_otp"
                 android:layout_marginBottom="20dp"
-                android:contentDescription="Reset password" />
+                android:contentDescription="OTP verification" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Quên Mật Khẩu"
+                android:text="Xác Thực Mã OTP"
                 android:textSize="28sp"
                 android:textColor="#2C3E50"
                 android:textStyle="bold"
@@ -43,56 +41,75 @@
                 android:fontFamily="sans-serif-medium" />
 
             <TextView
+                android:id="@+id/otpDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Vui lòng nhập email của bạn để nhận liên kết đặt lại mật khẩu"
+                android:text="Mã xác thực đã được gửi đến email@example.com"
                 android:textSize="16sp"
                 android:textColor="#7F8C8D"
                 android:paddingHorizontal="20dp"
                 android:fontFamily="sans-serif" />
         </LinearLayout>
-
-        <!-- Email Field -->
+        <!-- Timer Display -->
+        <!-- OTP Input -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Email đăng ký"
+            android:text="Nhập mã 6 số"
             android:textSize="16sp"
             android:textColor="#2C3E50"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="15dp"
             android:fontFamily="sans-serif-medium" />
 
-        <RelativeLayout
+        <!-- OTP Input Fields -->
+        <LinearLayout
+            android:id="@+id/otpContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/edittext_bg"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="30dp">
+
+            <!-- 6 OTP boxes will be added programmatically -->
+        </LinearLayout>
+
+        <!-- Resend OTP -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
             android:layout_marginBottom="40dp">
 
-            <EditText
-                android:id="@+id/forgotEmailEditText"
-                android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:hint="Nhập email đã đăng ký"
-                android:textSize="16sp"
-                android:background="@android:color/transparent"
-                android:inputType="textEmailAddress"
-                android:maxLines="1"
-                android:fontFamily="sans-serif"
-                android:textColor="#333333"
-                android:textColorHint="#A0AEC0" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Không nhận được mã? "
+                android:textSize="15sp"
+                android:textColor="#7F8C8D"
+                android:fontFamily="sans-serif" />
 
-        </RelativeLayout>
+            <TextView
+                android:id="@+id/resendOtpText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gửi lại"
+                android:textSize="15sp"
+                android:textColor="#4A6FA5"
+                android:textStyle="bold"
+                android:paddingLeft="5dp"
+                android:fontFamily="sans-serif" />
 
-        <!-- Reset Password Button -->
+        </LinearLayout>
+
+        <!-- Verify Button -->
         <Button
-            android:id="@+id/resetPasswordButton"
+            android:id="@+id/verifyOtpButton"
             android:layout_width="match_parent"
             android:layout_height="55dp"
-            android:text="Gửi Liên Kết Đặt Lại"
+            android:text="Xác Thực"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@android:color/white"
@@ -100,13 +117,13 @@
             android:layout_marginBottom="30dp"
             android:fontFamily="sans-serif-medium" />
 
-        <!-- Back to login link -->
+        <!-- Back link -->
         <TextView
-            android:id="@+id/textViewBackToLogin"
+            android:id="@+id/textViewBackToForgot"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="← Quay lại đăng nhập"
+            android:text="← Quay lại quên mật khẩu"
             android:textSize="16sp"
             android:textColor="#4A6FA5"
             android:padding="12dp"
