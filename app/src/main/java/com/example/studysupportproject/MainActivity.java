@@ -70,21 +70,5 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Màn hình hồ sơ", Toast.LENGTH_SHORT).show();
             }
         });
-
-        ConSQL c = new ConSQL();
-        Connection connection = c.conclass();
-        if (connection != null) {
-            Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-            try {
-                Statement smt = connection.createStatement();
-                ResultSet set = smt.executeQuery("SELECT * FROM dbo.roles");
-                while (set.next()) {
-                    Log.d("Connected", set.getString(1));
-                }
-                connection.close();
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-            }
-        }
     }
 }
