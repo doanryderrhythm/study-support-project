@@ -40,7 +40,7 @@ public class NewAccountActivity extends AppCompatActivity {
         btnSignUp = findViewById(R.id.signUpButton);
         tvCreateAccount = findViewById(R.id.textViewCreateAccount); // ID ĐÚNG
 
-        dbHelper = new DatabaseHelper(this);
+        dbHelper = new DatabaseHelper();
 
         btnTogglePassword.setOnClickListener(new View.OnClickListener() {
             @Override

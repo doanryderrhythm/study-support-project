@@ -40,7 +40,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
             return;
         }
 
-        dbHelper = new DatabaseHelper(this);
+        dbHelper = new DatabaseHelper();
         initViews();
         setupListeners();
     }

@@ -2,6 +2,8 @@ package com.example.studysupportproject;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -10,6 +12,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -21,12 +26,18 @@ public class LoginActivity extends AppCompatActivity {
     private ImageView btnToggleLoginPassword;
     private DatabaseHelper dbHelper;
 
+    private ExecutorService executorService;
+    private Handler mainHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         Log.d(TAG, "=== LOGIN ACTIVITY STARTED ===");
+
+        executorService = Executors.newSingleThreadExecutor();
+        mainHandler = new Handler(Looper.getMainLooper());
 
         // Ánh xạ view
         etLoginUsername = findViewById(R.id.loginUsernameEditText);
@@ -38,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
 
         Log.d(TAG, "btnCreateAccount = " + btnCreateAccount);
 
-        dbHelper = new DatabaseHelper(this);
+        dbHelper = new DatabaseHelper();
 
         // Sự kiện đăng ký
         btnCreateAccount.setOnClickListener(new View.OnClickListener() {
@@ -85,15 +96,6 @@ public class LoginActivity extends AppCompatActivity {
                 togglePasswordVisibility();
             }
         });
-        // TEST: Tự động chuyển sau 2 giây
-        new android.os.Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "Auto-test: Starting NewAccountActivity");
-                Intent intent = new Intent(LoginActivity.this, NewAccountActivity.class);
-                startActivity(intent);
-            }
-        }, 2000);
     }
 
     private void togglePasswordVisibility() {
@@ -117,14 +119,63 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        User user = dbHelper.checkLogin(usernameOrEmail, password);
-        if (user != null) {
-            Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
-            SharedPrefManager.getInstance(this).userLogin(user);
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
+        // Hiển thị loading
+        showLoading(true);
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // Thực hiện login trên background thread
+                    final User user = dbHelper.checkLogin(usernameOrEmail, password);
+
+                    // Quay về main thread để update UI
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            showLoading(false);
+
+                            if (user != null) {
+                                Toast.makeText(LoginActivity.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
+                                SharedPrefManager.getInstance(LoginActivity.this).userLogin(user);
+
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                Toast.makeText(LoginActivity.this, "Sai tên đăng nhập hoặc mật khẩu", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e(TAG, "Login error: " + e.getMessage());
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            showLoading(false);
+                            Toast.makeText(LoginActivity.this, "Lỗi kết nối: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void showLoading(boolean isLoading) {
+        if (isLoading) {
+            btnLogin.setEnabled(false);
+            btnLogin.setText("Đang đăng nhập...");
         } else {
-            Toast.makeText(this, "Sai tên đăng nhập hoặc mật khẩu", Toast.LENGTH_SHORT).show();
+            btnLogin.setEnabled(true);
+            btnLogin.setText("Đăng nhập");
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Dọn dẹp executor
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdown();
         }
     }
 }

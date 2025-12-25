@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 public class ConSQL {
+    private static final String TAG = "ConSQL";
     Connection con;
     @SuppressLint("NewApi")
     public Connection conclass()
@@ -21,10 +22,22 @@ public class ConSQL {
         try
         {
             Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            ConnectURL = "jdbc:jtds:sqlserver://" + ip + ":" + port + ";databasename="+ db + ";user=" + username + ";password=" + password + ";";
+            // Add connection timeout to avoid long waits
+            ConnectURL = "jdbc:jtds:sqlserver://" + ip + ":" + port +
+                    ";databasename=" + db +
+                    ";user=" + username +
+                    ";password=" + password +
+                    ";loginTimeout=10";
             con = DriverManager.getConnection(ConnectURL);
+
+            if (con != null) {
+                Log.i(TAG, "CONNECTION SUCCESSFUL");
+                Log.i(TAG, "Connected to: " + db);
+            } else {
+                Log.e(TAG, "CONNECTION RETURNED NULL");
+            }
         } catch (Exception e) {
-            Log.e("Error is ", e.getMessage());
+            Log.e("Error", e.getMessage());
         }
         return con;
     }

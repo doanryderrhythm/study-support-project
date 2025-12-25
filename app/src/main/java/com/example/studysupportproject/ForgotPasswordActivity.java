@@ -31,7 +31,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         btnResetPassword = findViewById(R.id.resetPasswordButton);
         tvBackToLogin = findViewById(R.id.textViewBackToLogin);
 
-        dbHelper = new DatabaseHelper(this);
+        dbHelper = new DatabaseHelper();
 
         // Sự kiện gửi yêu cầu đặt lại mật khẩu
         btnResetPassword.setOnClickListener(new View.OnClickListener() {

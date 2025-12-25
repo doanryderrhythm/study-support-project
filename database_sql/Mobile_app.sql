@@ -24,6 +24,14 @@ CREATE TABLE semesters (
     semester_name NVARCHAR(50) NOT NULL
 )
 
+-- Bảng vai trò
+CREATE TABLE roles (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    role_name NVARCHAR(50) UNIQUE NOT NULL,
+    description NVARCHAR(255),
+    created_at DATETIME2 DEFAULT GETDATE()
+);
+
 CREATE TABLE users (
     id INT IDENTITY(1,1) PRIMARY KEY,
     username NVARCHAR(50) UNIQUE NOT NULL,
@@ -32,21 +40,15 @@ CREATE TABLE users (
     full_name NVARCHAR(100),
     date_of_birth DATE,
     class_id INT NOT NULL,
+    role_id INT NOT NULL,
     phone NVARCHAR(20),
     address NVARCHAR(255),
     avatar NVARCHAR(255),
     is_active BIT DEFAULT 1,
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE(),
-    FOREIGN KEY (class_id) REFERENCES classes(id)
-);
-
--- Bảng vai trò
-CREATE TABLE roles (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    role_name NVARCHAR(50) UNIQUE NOT NULL,
-    description NVARCHAR(255),
-    created_at DATETIME2 DEFAULT GETDATE()
+    FOREIGN KEY (class_id) REFERENCES classes(id),
+    FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
 -- Bảng phân quyền user
@@ -231,8 +233,8 @@ INSERT INTO classes (class_name, school_id)
 VALUES (N'SE114', '1')
 
 -- Tạo tài khoản admin
-INSERT INTO users (username, password, email, full_name, class_id) 
-VALUES (N'Danh', N'danh123', N'danh123@school.edu.vn', N'Quản Trị Viên', '1');
+INSERT INTO users (username, password, email, full_name, class_id, role_id) 
+VALUES (N'Danh', N'danh123', N'danh123@school.edu.vn', N'Quản Trị Viên', '1', '1');
 
 -- Gán quyền admin
 INSERT INTO user_roles (user_id, role_id, granted_by) 
