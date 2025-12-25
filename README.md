@@ -42,4 +42,4 @@
   + Right click on "SQL Server (`[YOUR SERVER NAME]`)".
   + Press "Restart".
 4. RUN THE PROGRAM
-- Run the mobile program by connecting your device to Android Studio using USB cable, and press "Run".
+- Run the mobile program by use Android Studio's emulator, and press "Run". **ATTENTION: ONLY ANDROID STUDIO'S EMULATOR IS SUITABLE FOR THIS PROJECT.**
