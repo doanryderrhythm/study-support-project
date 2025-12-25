@@ -16,7 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class NewAccountActivity extends AppCompatActivity {
 
-    private EditText etUsername, etEmail, etPassword, etConfirmPassword;
+    private EditText etUsername, etEmail, etPassword, etConfirmPassword, etFullName, etPhoneNumber, etDateOfBirth, etAddress;
     private ImageView btnTogglePassword, btnToggleConfirmPassword;
     private Button btnSignUp;
     private TextView tvCreateAccount;
@@ -35,6 +35,10 @@ public class NewAccountActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.emailEditText);
         etPassword = findViewById(R.id.newPasswordEditText);
         etConfirmPassword = findViewById(R.id.reEnterPasswordEditText);
+        etFullName = findViewById(R.id.fullNameEditText);
+        etPhoneNumber = findViewById(R.id.phoneEditText);
+        etDateOfBirth = findViewById(R.id.dobEditText);
+        etAddress = findViewById(R.id.addressEditText);
         btnTogglePassword = findViewById(R.id.btnTogglePassword);
         btnToggleConfirmPassword = findViewById(R.id.btnToggleConfirmPassword);
         btnSignUp = findViewById(R.id.signUpButton);
@@ -124,6 +128,10 @@ public class NewAccountActivity extends AppCompatActivity {
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
         String confirmPassword = etConfirmPassword.getText().toString().trim();
+        String fullName = etFullName.getText().toString().trim();
+        String phoneNumber = etPhoneNumber.getText().toString().trim();
+        String dateOfBirth = etDateOfBirth.getText().toString().trim();
+        String address = etAddress.getText().toString().trim();
 
         // Validation
         if (username.isEmpty()) {
@@ -170,6 +178,10 @@ public class NewAccountActivity extends AppCompatActivity {
             return;
         }
 
+        if (dateOfBirth.isEmpty()) {
+            etDateOfBirth.setError("Ngày sinh trống");
+        }
+
         // Kiểm tra username đã tồn tại chưa
         if (dbHelper.checkUsernameExists(username)) {
             etUsername.setError("Tên đăng nhập đã được sử dụng");
@@ -185,7 +197,7 @@ public class NewAccountActivity extends AppCompatActivity {
         }
 
         // Thêm người dùng vào database
-        long result = dbHelper.addUser(username, email, password);
+        long result = dbHelper.addUser(username, email, password, fullName, phoneNumber, dateOfBirth, address);
 
         if (result != -1) {
             Toast.makeText(this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();

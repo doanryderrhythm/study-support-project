@@ -198,6 +198,142 @@
 
         </RelativeLayout>
 
+        <!-- Full name Field -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Họ và tên"
+            android:textSize="16sp"
+            android:textColor="#2C3E50"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="sans-serif-medium" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edittext_bg"
+            android:layout_marginBottom="20dp">
+
+            <EditText
+                android:id="@+id/fullNameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:hint="Nhập họ và tên"
+                android:textSize="16sp"
+                android:background="@android:color/transparent"
+                android:inputType="textPersonName"
+                android:maxLines="1"
+                android:fontFamily="sans-serif"
+                android:textColor="#333333"
+                android:textColorHint="#A0AEC0" />
+
+        </RelativeLayout>
+
+        <!-- Phone number Field -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Số điện thoại"
+            android:textSize="16sp"
+            android:textColor="#2C3E50"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="sans-serif-medium" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edittext_bg"
+            android:layout_marginBottom="20dp">
+
+            <EditText
+                android:id="@+id/phoneEditText"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:hint="Nhập số điện thoại"
+                android:textSize="16sp"
+                android:background="@android:color/transparent"
+                android:inputType="phone"
+                android:maxLines="1"
+                android:fontFamily="sans-serif"
+                android:textColor="#333333"
+                android:textColorHint="#A0AEC0" />
+
+        </RelativeLayout>
+
+        <!-- Date of Birth Field -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ngày sinh"
+            android:textSize="16sp"
+            android:textColor="#2C3E50"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="sans-serif-medium" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edittext_bg"
+            android:layout_marginBottom="20dp">
+
+            <EditText
+                android:id="@+id/dobEditText"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:hint="Nhập ngày sinh"
+                android:textSize="16sp"
+                android:background="@android:color/transparent"
+                android:inputType="text"
+                android:maxLines="1"
+                android:fontFamily="sans-serif"
+                android:textColor="#333333"
+                android:textColorHint="#A0AEC0" />
+
+        </RelativeLayout>
+
+        <!-- Address Field -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Địa chỉ thường trú"
+            android:textSize="16sp"
+            android:textColor="#2C3E50"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="sans-serif-medium" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edittext_bg"
+            android:layout_marginBottom="20dp">
+
+            <EditText
+                android:id="@+id/addressEditText"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:hint="Nhập địa chỉ thường trú"
+                android:textSize="16sp"
+                android:background="@android:color/transparent"
+                android:inputType="textMultiLine"
+                android:minLines="2"
+                android:fontFamily="sans-serif"
+                android:textColor="#333333"
+                android:textColorHint="#A0AEC0" />
+
+        </RelativeLayout>
+
         <!-- Sign Up Button -->
         <Button
             android:id="@+id/signUpButton"

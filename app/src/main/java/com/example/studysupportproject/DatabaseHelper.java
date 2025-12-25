@@ -20,7 +20,7 @@ public class DatabaseHelper {
     /**
      * Thêm người dùng mới
      */
-    public long addUser(String username, String email, String password) {
+    public long addUser(String username, String email, String password, String fullName, String phoneNumber, String dateOfBirth, String address) {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -33,14 +33,18 @@ public class DatabaseHelper {
                 return -1;
             }
 
-            // Lấy class_id mặc định (giả sử class_id = 1)
-            String query = "INSERT INTO users (username, email, password, class_id) " +
-                    "VALUES (?, ?, ?, 1); SELECT SCOPE_IDENTITY() as id";
+            // Lấy class_id mặc định (giả sử class_id = 1, role_id = 3)
+            String query = "INSERT INTO users (username, email, password, class_id, role_id, full_name, phone, date_of_birth, address) " +
+                    "VALUES (?, ?, ?, 1, 3, ?, ?, ?, ?); SELECT SCOPE_IDENTITY() as id";
 
             stmt = con.prepareStatement(query);
             stmt.setString(1, username);
             stmt.setString(2, email);
             stmt.setString(3, password);
+            stmt.setString(4, fullName);
+            stmt.setString(5, phoneNumber);
+            stmt.setString(6, dateOfBirth);
+            stmt.setString(7, address);
 
             rs = stmt.executeQuery();
             if (rs.next()) {
