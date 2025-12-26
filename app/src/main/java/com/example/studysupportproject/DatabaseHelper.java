@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseHelper {
 
@@ -366,11 +368,126 @@ public class DatabaseHelper {
     }
 
     /**
+     * Tạo post
+     */
+    public long createPost(String title, String content, int authorId, String postType) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        long postId = -1;
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) {
+                Log.e(TAG, "Connection is null");
+                return -1;
+            }
+
+            // Sử dụng stored procedure CreatePost
+            String query = "{CALL CreatePost(?, ?, ?, ?)}";
+            stmt = con.prepareStatement(query);
+            stmt.setString(1, title);
+            stmt.setString(2, content);
+            stmt.setInt(3, authorId);
+            stmt.setString(4, postType);
+
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                postId = rs.getLong("post_id");
+                Log.i(TAG, "Post created successfully with ID: " + postId);
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error creating post: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+        return postId;
+    }
+
+    /**
+     * Lấy posts theo author_id
+     */
+    public List<Post> getPostsByAuthor(int authorId) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<Post> posts = new ArrayList<>();
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) return posts;
+
+            String query = "";
+            if (authorId != -1) {
+                query = "SELECT * FROM posts WHERE author_id = ? ORDER BY created_at DESC";
+                stmt = con.prepareStatement(query);
+                stmt.setInt(1, authorId);
+            }
+            else {
+                query = "SELECT * FROM posts ORDER BY created_at DESC";
+                stmt = con.prepareStatement(query);
+            }
+
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Post post = new Post(
+                        rs.getInt("id"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getInt("author_id"),
+                        rs.getString("post_type"),
+                        rs.getBoolean("is_published"),
+                        rs.getString("published_at"),
+                        rs.getString("created_at"),
+                        rs.getString("updated_at")
+                );
+                posts.add(post);
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error getting posts by author: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+        return posts;
+    }
+
+    /**
      * Kiểm tra database có trống không
      */
     public boolean isDatabaseEmpty() {
         return getUsersCount() == 0;
     }
+
+    /**
+     * Lấy username từ user_id
+     */
+    public String getUsernameByAuthorId(int authorId) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        String username = null;
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) return null;
+
+            String query = "SELECT username FROM users WHERE id = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, authorId);
+
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                username = rs.getString("username");
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error getting username by author id: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+        return username;
+    }
+
     public boolean addTestUsers() {
         Connection con = null;
         PreparedStatement stmt = null;
