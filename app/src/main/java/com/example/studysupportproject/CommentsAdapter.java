@@ -56,37 +56,13 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         }
 
         public void bind(Comment comment) {
-            // Set commenter name
             if (comment.getCommenterUsername() != null && !comment.getCommenterUsername().isEmpty()) {
                 tvCommenterName.setText(comment.getCommenterUsername());
-
-                // Set initials
-                String initials = getInitials(comment.getCommenterUsername());
-                tvCommenterAvatar.setText(initials);
             } else {
                 tvCommenterName.setText("User " + comment.getCommenterId());
-                tvCommenterAvatar.setText("U");
             }
-
-            // Set comment content
             tvCommentContent.setText(comment.getContent());
-
-            // Set comment time
             tvCommentTime.setText(formatDate(comment.getCreatedAt()));
-        }
-
-        private String getInitials(String name) {
-            if (name == null || name.isEmpty()) {
-                return "U";
-            }
-
-            String[] parts = name.trim().split(" ");
-            if (parts.length >= 2) {
-                return (parts[0].charAt(0) + "" + parts[parts.length - 1].charAt(0)).toUpperCase();
-            } else if (parts.length == 1 && parts[0].length() > 0) {
-                return parts[0].substring(0, Math.min(2, parts[0].length())).toUpperCase();
-            }
-            return "U";
         }
 
         private String formatDate(String dateString) {
@@ -111,13 +87,13 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
                 long diffInDays = diffInMillis / (24 * 60 * 60 * 1000);
 
                 if (diffInMinutes < 1) {
-                    return "Just now";
+                    return "Vừa xong";
                 } else if (diffInMinutes < 60) {
-                    return diffInMinutes + " minutes ago";
+                    return diffInMinutes + " phút trước";
                 } else if (diffInHours < 24) {
-                    return diffInHours + " hours ago";
+                    return diffInHours + " giờ trước";
                 } else if (diffInDays < 7) {
-                    return diffInDays + " days ago";
+                    return diffInDays + " ngày trước";
                 } else {
                     SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd", Locale.getDefault());
                     return outputFormat.format(date);

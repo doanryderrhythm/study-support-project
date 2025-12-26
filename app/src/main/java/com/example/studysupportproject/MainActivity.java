@@ -62,7 +62,9 @@ public class MainActivity extends AppCompatActivity {
         navHome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Trang chủ", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, PostsActivity.class);
+                startActivity(intent);
+                drawerLayout.closeDrawer(GravityCompat.END);
             }
         });
 

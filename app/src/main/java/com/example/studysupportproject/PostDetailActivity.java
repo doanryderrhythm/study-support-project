@@ -1,5 +1,6 @@
 package com.example.studysupportproject;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -27,6 +28,7 @@ public class PostDetailActivity extends AppCompatActivity {
     private DatabaseHelper dbHelper;
     private CommentsAdapter commentsAdapter;
     private int postId;
+    private int currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +39,7 @@ public class PostDetailActivity extends AppCompatActivity {
 
         postId = getIntent().getIntExtra("post_id", -1);
         if (postId == -1) {
-            Toast.makeText(this, "Error loading post", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Lỗi tải bài viết", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -46,6 +48,16 @@ public class PostDetailActivity extends AppCompatActivity {
         setupRecyclerView();
         loadPostDetails();
         loadComments();
+
+        btnSendComment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendComment();
+            }
+        });
+
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        currentUserId = sharedPreferences.getInt("user_id", -1);
     }
 
     private void initViews() {
@@ -78,12 +90,12 @@ public class PostDetailActivity extends AppCompatActivity {
                     tvPostType.setText(post.getPostType().toUpperCase());
 
                     if (post.getUsername() != null) {
-                        tvAuthor.setText("By @" + post.getUsername());
+                        tvAuthor.setText("bởi @" + post.getUsername());
                     }
 
                     tvPostDate.setText(formatDate(post.getCreatedAt()));
                 } else {
-                    Toast.makeText(this, "Post not found", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Không thể tìm được bài viết này.", Toast.LENGTH_SHORT).show();
                     finish();
                 }
             });
@@ -104,6 +116,39 @@ public class PostDetailActivity extends AppCompatActivity {
                     commentsAdapter.updateComments(comments);
                 }
                 tvCommentCount.setText("(" + comments.size() + ")");
+            });
+        }).start();
+    }
+
+    private void sendComment() {
+        String commentText = etComment.getText().toString().trim();
+
+        if (commentText.isEmpty()) {
+            Toast.makeText(this, "Bạn chưa viết bình luận!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (currentUserId == -1) {
+            Toast.makeText(this, "Vui lòng đăng nhập để bình luận!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Ngăn chặn việc gửi một comment hai lần
+        btnSendComment.setEnabled(false);
+
+        new Thread(() -> {
+            long commentId = dbHelper.addComment(postId, currentUserId, commentText);
+
+            runOnUiThread(() -> {
+                btnSendComment.setEnabled(true);
+
+                if (commentId > 0) {
+                    etComment.setText("");
+                    Toast.makeText(this, "Thêm bình luận thành công!", Toast.LENGTH_SHORT).show();
+                    loadComments(); // Reload comments
+                } else {
+                    Toast.makeText(this, "Không thể thêm bình luận.", Toast.LENGTH_SHORT).show();
+                }
             });
         }).start();
     }

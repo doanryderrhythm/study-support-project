@@ -1,6 +1,7 @@
 package com.example.studysupportproject;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -137,6 +138,12 @@ public class LoginActivity extends AppCompatActivity {
                             if (user != null) {
                                 Toast.makeText(LoginActivity.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
                                 SharedPrefManager.getInstance(LoginActivity.this).userLogin(user);
+
+                                // Lưu thông tin của user
+                                SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                                SharedPreferences.Editor editor = prefs.edit();
+                                editor.putInt("user_id", user.getId());
+                                editor.apply();
 
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                 startActivity(intent);
