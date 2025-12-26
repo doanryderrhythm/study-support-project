@@ -1,9 +1,12 @@
 package com.example.studysupportproject;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import com.bumptech.glide.Glide;
 
 public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.CommentViewHolder> {
     private List<Comment> comments;
@@ -45,11 +50,12 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     }
 
     class CommentViewHolder extends RecyclerView.ViewHolder {
-        TextView tvCommenterAvatar, tvCommenterName, tvCommentContent, tvCommentTime;
+        ImageView imgCommenterAvatar;
+        TextView tvCommenterName, tvCommentContent, tvCommentTime;
 
         public CommentViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvCommenterAvatar = itemView.findViewById(R.id.tvCommenterAvatar);
+            imgCommenterAvatar = itemView.findViewById(R.id.imgCommenterAvatar);
             tvCommenterName = itemView.findViewById(R.id.tvCommenterName);
             tvCommentContent = itemView.findViewById(R.id.tvCommentContent);
             tvCommentTime = itemView.findViewById(R.id.tvCommentTime);
@@ -60,6 +66,13 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
                 tvCommenterName.setText(comment.getCommenterUsername());
             } else {
                 tvCommenterName.setText("User " + comment.getCommenterId());
+            }
+            if (comment.getCommenterAvatar() != null && !comment.getCommenterAvatar().isEmpty()) {
+                Glide.with(itemView.getContext())
+                        .load(comment.getCommenterAvatar())
+                        .placeholder(R.drawable.ic_avatar_placeholder)
+                        .error(R.drawable.ic_avatar_placeholder)
+                        .into(imgCommenterAvatar);
             }
             tvCommentContent.setText(comment.getContent());
             tvCommentTime.setText(formatDate(comment.getCreatedAt()));

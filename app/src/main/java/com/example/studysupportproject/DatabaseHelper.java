@@ -513,7 +513,7 @@ public class DatabaseHelper {
             con = conSQL.conclass();
             if (con == null) return comments;
 
-            String query = "SELECT c.*, u.username, u.full_name " +
+            String query = "SELECT c.*, u.username, u.full_name, u.avatar " +
                     "FROM comments c " +
                     "LEFT JOIN users u ON c.commenter_id = u.id " +
                     "WHERE c.post_id = ? " +
@@ -530,6 +530,7 @@ public class DatabaseHelper {
                         rs.getInt("commenter_id"),
                         rs.getString("username"),
                         rs.getString("full_name"),
+                        rs.getString("avatar"),
                         rs.getString("content"),
                         rs.getString("created_at"),
                         rs.getString("updated_at")
@@ -665,4 +666,4 @@ public class DatabaseHelper {
             Log.e(TAG, "Error closing resources: " + e.getMessage());
         }
     }
-}  // <-- KẾT THÚC CLASS Ở ĐÂY, KHÔNG CÓ CLASS LỒNG NHAU
+}
