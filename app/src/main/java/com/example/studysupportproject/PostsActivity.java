@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -104,11 +105,13 @@ class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.PostViewHolder> {
     }
 
     class PostViewHolder extends RecyclerView.ViewHolder {
+        CardView postCardView;
         TextView tvTitle, tvContent, tvPostType;
         TextView tvAuthor, tvAdditionalInfo;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
+            postCardView = (CardView) itemView;
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvContent = itemView.findViewById(R.id.tvContent);
             tvPostType = itemView.findViewById(R.id.tvPostType);
@@ -125,6 +128,17 @@ class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.PostViewHolder> {
             if (authorUsername != null) {
                 String authorString = "Author: " + authorUsername;
                 tvAuthor.setText(authorString);
+            }
+
+            // Change background color based on post type
+            if (post.getPostType().equals("general")) {
+                postCardView.setCardBackgroundColor(0xFFFFFFFF);
+            }
+            else if (post.getPostType().equals("announcement")) {
+                postCardView.setCardBackgroundColor(0xFFFFFEE5);
+            }
+            else if (post.getPostType().equals("grade")) {
+                postCardView.setCardBackgroundColor(0xFFC8F3C8);
             }
 
             // Format published date
