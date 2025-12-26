@@ -1,0 +1,108 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <!-- Profile Header Section -->
+    <LinearLayout
+        android:id="@+id/profileHeader"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#FFFFFF"
+        android:padding="16dp"
+        android:elevation="4dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Profile Picture and Names -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Profile Picture Placeholder -->
+            <TextView
+                android:id="@+id/tvProfilePicture"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:background="@drawable/circle_background"
+                android:gravity="center" />
+
+            <!-- Names Section -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="16dp">
+
+                <!-- Full Name -->
+                <TextView
+                    android:id="@+id/tvFullName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Full Name"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#212121" />
+
+                <!-- Username -->
+                <TextView
+                    android:id="@+id/tvUsername"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Username"
+                    android:textSize="14sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginTop="16dp" />
+    </LinearLayout>
+    <!-- RecyclerView for Posts -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPosts"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="8dp"
+        android:clipToPadding="false"
+        app:layout_constraintTop_toBottomOf="@id/profileHeader"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/item_post" />
+
+    <!-- Empty State -->
+    <LinearLayout
+        android:id="@+id/llEmptyState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/profileHeader"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_post_available"
+            android:textSize="18sp"
+            android:textColor="#757575" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

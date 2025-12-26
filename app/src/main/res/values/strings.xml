@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">StudySupportProject</string>
+    <string name="no_post_available">Không có bài viết nào.</string>
 </resources>
