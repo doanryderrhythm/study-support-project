@@ -44,7 +44,9 @@ public class PostsActivity extends AppCompatActivity {
 
     private void setupRecyclerView() {
         postsAdapter = new PostsAdapter(new ArrayList<>(), post -> {
-            Toast.makeText(this, "Clicked: " + post.getTitle(), Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, PostDetailActivity.class);
+            intent.putExtra("post_id", post.getId());
+            startActivity(intent);
         });
 
         rvPosts.setLayoutManager(new LinearLayoutManager(this));
@@ -52,7 +54,7 @@ public class PostsActivity extends AppCompatActivity {
     }
 
     private void loadPosts() {
-        List<Post> posts = dbHelper.getPostsByAuthor(-1);
+        List<Post> posts = dbHelper.getAllPosts();
 
         if (posts.isEmpty()) {
             rvPosts.setVisibility(View.GONE);

@@ -94,6 +94,17 @@ CREATE TABLE posts (
     FOREIGN KEY (author_id) REFERENCES users(id)
 );
 
+CREATE TABLE comments (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    post_id INT NOT NULL,
+    commenter_id INT NOT NULL,
+    content NTEXT,
+    created_at DATETIME2 DEFAULT GETDATE(),
+    updated_at DATETIME2 DEFAULT GETDATE(),
+    FOREIGN KEY (post_id) REFERENCES posts(id),
+    FOREIGN KEY (commenter_id) REFERENCES users(id)
+)
+
 -- Bảng điểm 
 CREATE TABLE grades (
     id INT IDENTITY(1,1) PRIMARY KEY,

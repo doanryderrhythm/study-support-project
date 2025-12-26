@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <!-- Commenter Avatar -->
+        <TextView
+            android:id="@+id/tvCommenterAvatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/circle_background"
+            android:gravity="center"
+            android:text="AB"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+
+        <!-- Comment Content -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+
+            <!-- Commenter Name -->
+            <TextView
+                android:id="@+id/tvCommenterName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Username"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#212121" />
+
+            <!-- Comment Text -->
+            <TextView
+                android:id="@+id/tvCommentContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Comment content"
+                android:textSize="14sp"
+                android:textColor="#424242"
+                android:layout_marginTop="4dp" />
+
+            <!-- Comment Time -->
+            <TextView
+                android:id="@+id/tvCommentTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="XYZ hours ago"
+                android:textSize="12sp"
+                android:textColor="#9E9E9E"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

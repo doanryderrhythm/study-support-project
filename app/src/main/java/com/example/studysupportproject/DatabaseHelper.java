@@ -407,7 +407,7 @@ public class DatabaseHelper {
     /**
      * Lấy posts theo author_id
      */
-    public List<Post> getPostsByAuthor(int authorId) {
+    public List<Post> getAllPosts() {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -417,23 +417,11 @@ public class DatabaseHelper {
             con = conSQL.conclass();
             if (con == null) return posts;
 
-            String query;
-            if (authorId != -1) {
-                query = "SELECT p.*, u.username, u.full_name " +
-                        "FROM posts p " +
-                        "LEFT JOIN users u ON p.author_id = u.id " +
-                        "WHERE p.author_id = ? " +
-                        "ORDER BY p.created_at DESC";
-                stmt = con.prepareStatement(query);
-                stmt.setInt(1, authorId);
-            } else {
-                query = "SELECT p.*, u.username, u.full_name " +
+            String query = "SELECT p.*, u.username, u.full_name " +
                         "FROM posts p " +
                         "LEFT JOIN users u ON p.author_id = u.id " +
                         "ORDER BY p.created_at DESC";
-                stmt = con.prepareStatement(query);
-            }
-
+            stmt = con.prepareStatement(query);
             rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -453,11 +441,56 @@ public class DatabaseHelper {
                 posts.add(post);
             }
         } catch (SQLException e) {
-            Log.e(TAG, "Error getting posts by author: " + e.getMessage());
+            Log.e(TAG, "Error getting posts: " + e.getMessage());
         } finally {
             closeResources(rs, stmt, con);
         }
         return posts;
+    }
+
+    /**
+     * Lấy thông tin chi tiết của một post
+     */
+    public Post getPostById(int postId) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Post post = null;
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) return null;
+
+            String query = "SELECT p.*, u.username, u.full_name " +
+                    "FROM posts p " +
+                    "LEFT JOIN users u ON p.author_id = u.id " +
+                    "WHERE p.id = ?";
+
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, postId);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                post = new Post(
+                        rs.getInt("id"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getInt("author_id"),
+                        rs.getString("username"),
+                        rs.getString("full_name"),
+                        rs.getString("post_type"),
+                        rs.getBoolean("is_published"),
+                        rs.getString("published_at"),
+                        rs.getString("created_at"),
+                        rs.getString("updated_at")
+                );
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error getting post by id: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+        return post;
     }
 
     /**
@@ -468,32 +501,85 @@ public class DatabaseHelper {
     }
 
     /**
-     * Lấy username từ user_id
+     * Lấy tất cả comments của một post
      */
-    public String getUsernameByAuthorId(int authorId) {
+    public List<Comment> getCommentsByPostId(int postId) {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String username = null;
+        List<Comment> comments = new ArrayList<>();
 
         try {
             con = conSQL.conclass();
-            if (con == null) return null;
+            if (con == null) return comments;
 
-            String query = "SELECT username FROM users WHERE id = ?";
+            String query = "SELECT c.*, u.username, u.full_name " +
+                    "FROM comments c " +
+                    "LEFT JOIN users u ON c.commenter_id = u.id " +
+                    "WHERE c.post_id = ? " +
+                    "ORDER BY c.created_at ASC";
+
             stmt = con.prepareStatement(query);
-            stmt.setInt(1, authorId);
-
+            stmt.setInt(1, postId);
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                username = rs.getString("username");
+
+            while (rs.next()) {
+                Comment comment = new Comment(
+                        rs.getInt("id"),
+                        rs.getInt("post_id"),
+                        rs.getInt("commenter_id"),
+                        rs.getString("username"),
+                        rs.getString("full_name"),
+                        rs.getString("content"),
+                        rs.getString("created_at"),
+                        rs.getString("updated_at")
+                );
+                comments.add(comment);
             }
+            Log.i(TAG, "Retrieved " + comments.size() + " comments for post " + postId);
         } catch (SQLException e) {
-            Log.e(TAG, "Error getting username by author id: " + e.getMessage());
+            Log.e(TAG, "Error getting comments: " + e.getMessage());
         } finally {
             closeResources(rs, stmt, con);
         }
-        return username;
+        return comments;
+    }
+
+    /**
+     * Thêm comment mới
+     */
+    public long addComment(int postId, int commenterId, String content) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        long commentId = -1;
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) {
+                Log.e(TAG, "Connection is null");
+                return -1;
+            }
+
+            String query = "INSERT INTO comments (post_id, commenter_id, content) " +
+                    "VALUES (?, ?, ?); SELECT SCOPE_IDENTITY() as id";
+
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, postId);
+            stmt.setInt(2, commenterId);
+            stmt.setString(3, content);
+
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                commentId = rs.getLong("id");
+                Log.i(TAG, "Comment added successfully with ID: " + commentId);
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error adding comment: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+        return commentId;
     }
 
     public boolean addTestUsers() {

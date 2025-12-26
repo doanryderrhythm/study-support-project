@@ -36,6 +36,9 @@
         <activity
             android:name=".ProfilePostsActivity"
             android:exported="false" />
+        <activity
+            android:name=".PostDetailActivity"
+            android:exported="false" />
         <activity android:name=".OtpVerificationActivity" />
         <activity android:name=".ResetPasswordActivity" />
 
