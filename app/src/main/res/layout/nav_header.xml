@@ -8,18 +8,21 @@
     android:padding="16dp">
 
     <ImageView
+        android:id="@+id/ivProfilePicture"
         android:layout_width="120dp"
         android:layout_height="120dp"
         android:src="@drawable/ic_avatar_placeholder"
-        android:contentDescription="ProfilePicture" />
+        android:contentDescription="Profile Picture"
+        android:scaleType="centerCrop" />
 
     <TextView
+        android:id="@+id/tvProfileName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Placeholder Name"
-        android:textSize="32sp"
+        android:textSize="20sp"
+        android:textStyle="bold"
         android:textColor="@android:color/white"
         android:layout_marginTop="8dp" />
 
 </LinearLayout>
-

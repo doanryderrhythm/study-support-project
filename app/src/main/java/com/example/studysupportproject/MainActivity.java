@@ -15,6 +15,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.bumptech.glide.Glide;
+import com.google.android.material.navigation.NavigationView;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -26,7 +29,13 @@ public class MainActivity extends AppCompatActivity {
     private View navProfile;
     private DrawerLayout drawerLayout;
     private ImageButton menuButton;
+    private NavigationView navView;
 
+    private ImageView ivProfilePicture;
+    private TextView tvProfileName;
+
+    private DatabaseHelper dbHelper;
+    private int currentUserId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,16 +47,60 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        dbHelper = new DatabaseHelper();
+
         setContentView(R.layout.activity_main);
+
+        currentUserId = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+                .getInt("user_id", -1);
 
         drawerLayout = findViewById(R.id.drawer_layout);
         menuButton = findViewById(R.id.menu_button);
         navHome = findViewById(R.id.nav_home);
         navStudy = findViewById(R.id.nav_study);
         navProfile = findViewById(R.id.nav_profile);
+        navView = findViewById(R.id.nav_view);
+        View headerView = navView.getHeaderView(0);
+        ivProfilePicture = headerView.findViewById(R.id.ivProfilePicture);
+        tvProfileName = headerView.findViewById(R.id.tvProfileName);
 
+        loadUserProfile();
         setupMenuButton();
         setupBottomNavigation();
+    }
+
+    private void loadUserProfile() {
+        if (currentUserId == -1) {
+            tvProfileName.setText("Khách");
+            return;
+        }
+
+        // Load user data in background thread
+        new Thread(() -> {
+            User user = dbHelper.getUserById(currentUserId);
+
+            runOnUiThread(() -> {
+                if (user != null) {
+                    if (user.getFullName() != null && !user.getFullName().isEmpty()) {
+                        tvProfileName.setText(user.getFullName());
+                    } else {
+                        tvProfileName.setText(user.getUsername());
+                    }
+
+                    loadAvatar(user.getAvatar());
+                } else {
+                    tvProfileName.setText("Unknown user");
+                }
+            });
+        }).start();
+    }
+
+    private void loadAvatar(String avatarUrl) {
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            Glide.with(this).load(avatarUrl).into(ivProfilePicture);
+        } else {
+            ivProfilePicture.setImageResource(R.drawable.ic_avatar_placeholder);
+        }
     }
 
     private void setupMenuButton() {
