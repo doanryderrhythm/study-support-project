@@ -27,12 +27,13 @@
             android:gravity="center_vertical">
 
             <!-- Profile Picture Placeholder -->
-            <TextView
-                android:id="@+id/tvProfilePicture"
+            <ImageView
+                android:id="@+id/imgProfilePicture"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
+                android:scaleType="centerCrop"
                 android:background="@drawable/circle_background"
-                android:gravity="center" />
+                android:src="@drawable/ic_avatar_placeholder" />
 
             <!-- Names Section -->
             <LinearLayout

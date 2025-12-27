@@ -6,6 +6,7 @@ public class User {
     private String email;
     private String password;
     private String fullName;
+    private String avatar;
     private String phone;
     private String createdAt;
 
@@ -13,10 +14,11 @@ public class User {
     public User() {
     }
 
-    public User(String username, String email, String password) {
+    public User(String username, String email, String password, String avatar) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.avatar = avatar;
     }
 
     // Getters and Setters
@@ -59,6 +61,10 @@ public class User {
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
+
+    public String getAvatar() { return this.avatar; }
+
+    public void setAvatar(String avatar) { this.avatar = avatar; }
 
     public String getPhone() {
         return phone;

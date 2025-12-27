@@ -247,11 +247,49 @@ public class DatabaseHelper {
                 user.setEmail(rs.getString("email"));
                 user.setPassword(rs.getString("password"));
                 user.setFullName(rs.getString("full_name") != null ? rs.getString("full_name") : "");
+                user.setAvatar(rs.getString("avatar") != null ? rs.getString("avatar") : "");
                 user.setPhone(rs.getString("phone") != null ? rs.getString("phone") : "");
                 user.setCreatedAt(rs.getString("created_at") != null ? rs.getString("created_at") : "");
             }
         } catch (SQLException e) {
             Log.e(TAG, "Error getting user by email: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+        return user;
+    }
+
+    /**
+     * Lấy user bằng ID
+     */
+    public User getUserById(int user_id) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        User user = null;
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) return null;
+
+            String query = "SELECT * FROM users WHERE id = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, user_id);
+
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                user = new User();
+                user.setId(rs.getInt("id"));
+                user.setUsername(rs.getString("username"));
+                user.setEmail(rs.getString("email"));
+                user.setPassword(rs.getString("password"));
+                user.setFullName(rs.getString("full_name") != null ? rs.getString("full_name") : "");
+                user.setAvatar(rs.getString("avatar") != null ? rs.getString("avatar") : "");
+                user.setPhone(rs.getString("phone") != null ? rs.getString("phone") : "");
+                user.setCreatedAt(rs.getString("created_at") != null ? rs.getString("created_at") : "");
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error getting user by id: " + e.getMessage());
         } finally {
             closeResources(rs, stmt, con);
         }
@@ -440,7 +478,7 @@ public class DatabaseHelper {
     }
 
     /**
-     * Lấy posts theo author_id
+     * Lấy tất cả các bài viết
      */
     public List<Post> getAllPosts() {
         Connection con = null;
@@ -457,6 +495,49 @@ public class DatabaseHelper {
                         "LEFT JOIN users u ON p.author_id = u.id " +
                         "ORDER BY p.created_at DESC";
             stmt = con.prepareStatement(query);
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Post post = new Post(
+                        rs.getInt("id"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getInt("author_id"),
+                        rs.getString("username"),
+                        rs.getString("full_name"),
+                        rs.getString("post_type"),
+                        rs.getBoolean("is_published"),
+                        rs.getString("published_at"),
+                        rs.getString("created_at"),
+                        rs.getString("updated_at")
+                );
+                posts.add(post);
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error getting posts: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+        return posts;
+    }
+
+    public List<Post> getPostsFromAuthor(int author_id) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<Post> posts = new ArrayList<>();
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) return posts;
+
+            String query = "SELECT p.*, u.username, u.full_name " +
+                    "FROM posts p " +
+                    "LEFT JOIN users u ON p.author_id = u.id " +
+                    "WHERE u.id = ? " +
+                    "ORDER BY p.created_at DESC";
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, author_id);
             rs = stmt.executeQuery();
 
             while (rs.next()) {
