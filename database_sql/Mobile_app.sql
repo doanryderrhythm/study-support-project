@@ -267,6 +267,50 @@ BEGIN
 END;
 GO
 
+-- Stored Procedure sửa bài viết
+CREATE PROCEDURE UpdatePost
+    @post_id INT,
+    @title NVARCHAR(255),
+    @content NTEXT,
+    @post_type NVARCHAR(50) = NULL
+AS
+BEGIN
+    -- Check if post exists
+    IF NOT EXISTS (SELECT 1 FROM posts WHERE id = @post_id)
+    BEGIN
+        SELECT -1 as result;
+        RETURN;
+    END
+
+    IF @post_type IS NOT NULL
+    BEGIN
+        UPDATE posts 
+        SET title = @title,
+            content = @content,
+            post_type = @post_type,
+            updated_at = GETDATE()
+        WHERE id = @post_id;
+    END
+    ELSE
+    BEGIN
+        UPDATE posts 
+        SET title = @title,
+            content = @content,
+            updated_at = GETDATE()
+        WHERE id = @post_id;
+    END
+
+    IF @@ROWCOUNT > 0
+    BEGIN
+        SELECT 1 as result;
+    END
+    ELSE
+    BEGIN
+        SELECT 0 as result;
+    END
+END;
+GO
+
 -- Stored Procedure nhập điểm
 CREATE PROCEDURE AddGrade
     @student_id INT,

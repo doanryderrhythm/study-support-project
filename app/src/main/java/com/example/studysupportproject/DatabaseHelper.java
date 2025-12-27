@@ -383,7 +383,6 @@ public class DatabaseHelper {
                 return -1;
             }
 
-            // Sử dụng stored procedure CreatePost
             String query = "{CALL CreatePost(?, ?, ?, ?)}";
             stmt = con.prepareStatement(query);
             stmt.setString(1, title);
@@ -402,6 +401,42 @@ public class DatabaseHelper {
             closeResources(rs, stmt, con);
         }
         return postId;
+    }
+
+    /**
+     * Cập nhật post với post_type
+     */
+    public boolean updatePost(int postId, String title, String content, String postType) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        boolean success = false;
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) return false;
+
+            // Sử dụng stored procedure UpdatePost
+            String query = "{CALL UpdatePost(?, ?, ?, ?)}";
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, postId);
+            stmt.setString(2, title);
+            stmt.setString(3, content);
+            stmt.setString(4, postType);
+
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                int result = rs.getInt("result");
+                String message = rs.getString("message");
+                success = result > 0;
+                Log.i(TAG, message);
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error updating post: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+        return success;
     }
 
     /**
