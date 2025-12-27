@@ -1,5 +1,6 @@
 package com.example.studysupportproject;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -23,11 +24,11 @@ public class PostDetailActivity extends AppCompatActivity {
     private TextView tvCommentCount, tvNoComments;
     private RecyclerView rvComments;
     private EditText etComment;
-    private Button btnSendComment;
-
+    private Button btnSendComment, btnEditPost;
     private DatabaseHelper dbHelper;
     private CommentsAdapter commentsAdapter;
     private int postId;
+    private int postAuthorId;
     private int currentUserId;
 
     @Override
@@ -48,6 +49,7 @@ public class PostDetailActivity extends AppCompatActivity {
         setupRecyclerView();
         loadPostDetails();
         loadComments();
+        setupEditAbility();
 
         btnSendComment.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,8 +58,34 @@ public class PostDetailActivity extends AppCompatActivity {
             }
         });
 
+        btnEditPost.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(PostDetailActivity.this, CreatePostActivity.class);
+                intent.putExtra("post_id", postId);
+                startActivityForResult(intent, 50);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 50 && resultCode == RESULT_OK) {
+            loadPostDetails();
+            loadComments();
+        }
+    }
+
+    private void setupEditAbility() {
+        postAuthorId = getIntent().getIntExtra("user_id", -1);
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         currentUserId = sharedPreferences.getInt("user_id", -1);
+
+        if (postAuthorId != currentUserId) {
+            btnEditPost.setVisibility(View.GONE);
+        }
+        else btnEditPost.setVisibility(View.VISIBLE);
     }
 
     private void initViews() {
@@ -71,6 +99,7 @@ public class PostDetailActivity extends AppCompatActivity {
         rvComments = findViewById(R.id.rvComments);
         etComment = findViewById(R.id.etComment);
         btnSendComment = findViewById(R.id.btnSendComment);
+        btnEditPost = findViewById(R.id.btnEditPost);
     }
 
     private void setupRecyclerView() {

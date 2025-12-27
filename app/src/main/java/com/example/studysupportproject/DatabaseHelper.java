@@ -452,9 +452,11 @@ public class DatabaseHelper {
 
         try {
             con = conSQL.conclass();
-            if (con == null) return false;
+            if (con == null) {
+                Log.e(TAG, "Connection is null");
+                return false;
+            }
 
-            // Sử dụng stored procedure UpdatePost
             String query = "{CALL UpdatePost(?, ?, ?, ?)}";
             stmt = con.prepareStatement(query);
             stmt.setInt(1, postId);
@@ -462,15 +464,24 @@ public class DatabaseHelper {
             stmt.setString(3, content);
             stmt.setString(4, postType);
 
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                int result = rs.getInt("result");
-                String message = rs.getString("message");
-                success = result > 0;
-                Log.i(TAG, message);
+            boolean hasResults = stmt.execute();
+
+            if (hasResults) {
+                rs = stmt.getResultSet();
+                if (rs != null && rs.next()) {
+                    int result = rs.getInt("result");
+                    String message = rs.getString("message");
+                    success = result > 0;
+                    Log.i(TAG, "Stored procedure result: " + result + ", message: " + message);
+                }
+            } else {
+                int updateCount = stmt.getUpdateCount();
+                success = updateCount > 0;
+                Log.i(TAG, "Update count: " + updateCount);
             }
         } catch (SQLException e) {
             Log.e(TAG, "Error updating post: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             closeResources(rs, stmt, con);
         }

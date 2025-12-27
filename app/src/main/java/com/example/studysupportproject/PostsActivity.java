@@ -32,11 +32,8 @@ public class PostsActivity extends AppCompatActivity {
     private FloatingActionButton fabMain;
     private LinearLayout fabMenuItems, fabCreatePost, fabViewProfile;
     private boolean isFabMenuOpen = false;
-
-    // Animations
     private Animation fabRotateClockwise, fabRotateCounterClockwise;
     private Animation fabOpen, fabClose;
-
     private PostsAdapter postsAdapter;
     private DatabaseHelper dbHelper;
 
@@ -53,6 +50,14 @@ public class PostsActivity extends AppCompatActivity {
         setupFabMenu();
         setupRecyclerView();
         loadPosts();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            loadPosts();
+        }
     }
 
     private void setupFabMenu() {
@@ -113,6 +118,7 @@ public class PostsActivity extends AppCompatActivity {
         postsAdapter = new PostsAdapter(new ArrayList<>(), post -> {
             Intent intent = new Intent(this, PostDetailActivity.class);
             intent.putExtra("post_id", post.getId());
+            intent.putExtra("user_id", post.getAuthorId());
             startActivity(intent);
         });
 

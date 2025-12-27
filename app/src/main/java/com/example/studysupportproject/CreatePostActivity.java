@@ -15,7 +15,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class CreatePostActivity extends AppCompatActivity {
-    private TextView tvTitle, tvCharCount;
+    private TextView tvTitle;
     private EditText etPostTitle, etPostContent;
     private RadioGroup rgPostType;
     private RadioButton rbGeneral, rbAnnouncement, rbGrade;
@@ -60,11 +60,7 @@ public class CreatePostActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (hasUnsavedChanges()) {
-                    showDiscardDialog();
-                } else {
-                    finish();
-                }
+                finish();
             }
         });
     }
@@ -89,11 +85,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
     private void setupListeners() {
         btnCancel.setOnClickListener(v -> {
-            if (hasUnsavedChanges()) {
-                showDiscardDialog();
-            } else {
-                finish();
-            }
+            finish();
         });
 
         btnPublish.setOnClickListener(v -> {
@@ -222,20 +214,5 @@ public class CreatePostActivity extends AppCompatActivity {
         }
 
         return "";
-    }
-
-    private boolean hasUnsavedChanges() {
-        String title = etPostTitle.getText().toString().trim();
-        String content = etPostContent.getText().toString().trim();
-        return !title.isEmpty() || !content.isEmpty();
-    }
-
-    private void showDiscardDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Hủy các thay đổi?")
-                .setMessage("Bạn có các thay đổi chưa được lưu. Xác nhận hủy các thay đổi?")
-                .setPositiveButton("Hủy thay đổi", (dialog, which) -> finish())
-                .setNegativeButton("Tiếp tục sửa", null)
-                .show();
     }
 }
