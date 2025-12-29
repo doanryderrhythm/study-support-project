@@ -195,10 +195,17 @@ public class DatabaseHelper {
 
         try {
             con = conSQL.conclass();
-            if (con == null) return null;
+            if (con == null) {
+                Log.e(TAG, "Connection is null in checkLogin");
+                return null;
+            }
 
             String query = "SELECT * FROM users WHERE (username = ? OR email = ?) AND password = ?";
             stmt = con.prepareStatement(query);
+            if (stmt == null) {
+                Log.e(TAG, "PreparedStatement is null in checkLogin");
+                return null;
+            }
             stmt.setString(1, usernameOrEmail);
             stmt.setString(2, usernameOrEmail);
             stmt.setString(3, password);
@@ -233,10 +240,17 @@ public class DatabaseHelper {
 
         try {
             con = conSQL.conclass();
-            if (con == null) return null;
+            if (con == null) {
+                Log.e(TAG, "Connection is null in getUserByEmail");
+                return null;
+            }
 
             String query = "SELECT * FROM users WHERE email = ?";
             stmt = con.prepareStatement(query);
+            if (stmt == null) {
+                Log.e(TAG, "PreparedStatement is null in getUserByEmail");
+                return null;
+            }
             stmt.setString(1, email);
 
             rs = stmt.executeQuery();
@@ -270,10 +284,17 @@ public class DatabaseHelper {
 
         try {
             con = conSQL.conclass();
-            if (con == null) return null;
+            if (con == null) {
+                Log.e(TAG, "Connection is null in getUserById");
+                return null;
+            }
 
             String query = "SELECT u.*, r.role_name FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.id = ?";
             stmt = con.prepareStatement(query);
+            if (stmt == null) {
+                Log.e(TAG, "PreparedStatement is null in getUserById");
+                return null;
+            }
             stmt.setInt(1, user_id);
 
             rs = stmt.executeQuery();
