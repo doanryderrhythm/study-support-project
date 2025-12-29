@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import androidx.annotation.NonNull;
 import android.view.MenuItem;
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseHelper dbHelper;
     private int currentUserId;
     private String userRole;
+    private FloatingActionButton fabAddSchedule;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
         setupMenuButton();
         setupNavigationViewMenu();
         setupBottomNavigation();
+        setupFloatingActionButton();
         loadSchedules();
     }
 
@@ -138,12 +141,31 @@ public class MainActivity extends AppCompatActivity {
         rvSchedules.setLayoutManager(new LinearLayoutManager(this));
         scheduleAdapter = new ScheduleAdapter(null, this);
 
-        // Set click listener for schedule items
+        // Set click listener for schedule items - opens edit activity
         scheduleAdapter.setOnScheduleClickListener(schedule -> {
-            Toast.makeText(MainActivity.this,
-                    "Schedule: " + schedule.getTitle(),
-                    Toast.LENGTH_SHORT).show();
-            Log.d("MainActivity", "Schedule clicked: " + schedule.toString());
+            Intent intent = new Intent(MainActivity.this, ScheduleDetailActivity.class);
+            intent.putExtra("schedule_id", schedule.getId());
+            intent.putExtra("schedule_title", schedule.getTitle());
+            intent.putExtra("schedule_description", schedule.getDescription());
+            intent.putExtra("schedule_date", schedule.getScheduleDate());
+            intent.putExtra("schedule_start_time", schedule.getStartTime());
+            intent.putExtra("schedule_end_time", schedule.getEndTime());
+            intent.putExtra("schedule_type", schedule.getScheduleType());
+            intent.putExtra("user_id", currentUserId);
+            startActivityForResult(intent, 100);
+        });
+
+        // Set delete listener for schedule items
+        scheduleAdapter.setOnScheduleDeleteListener((schedule, position) -> {
+            // Show confirmation dialog
+            new androidx.appcompat.app.AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Delete Schedule")
+                    .setMessage("Are you sure you want to delete \"" + schedule.getTitle() + "\"?")
+                    .setPositiveButton("Delete", (dialog, which) -> {
+                        deleteSchedule(schedule.getId());
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
         });
 
         rvSchedules.setAdapter(scheduleAdapter);
@@ -235,6 +257,42 @@ public class MainActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    private void setupFloatingActionButton() {
+        fabAddSchedule = findViewById(R.id.fab_add_schedule);
+        fabAddSchedule.setOnClickListener(v -> {
+            // Open ScheduleDetailActivity for creating new schedule
+            Intent intent = new Intent(MainActivity.this, ScheduleDetailActivity.class);
+            intent.putExtra("schedule_id", -1); // -1 means new schedule
+            intent.putExtra("user_id", currentUserId);
+            startActivityForResult(intent, 100);
+        });
+    }
+
+    private void deleteSchedule(int scheduleId) {
+        new Thread(() -> {
+            try {
+                dbHelper.deleteSchedule(scheduleId);
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivity.this, "Schedule deleted", Toast.LENGTH_SHORT).show();
+                    loadSchedules();
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivity.this, "Error deleting schedule: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            loadSchedules();
+        }
     }
 
     private void setupBottomNavigation() {
