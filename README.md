@@ -41,5 +41,13 @@
   + Click "SQL Server Services".
   + Right click on "SQL Server (`[YOUR SERVER NAME]`)".
   + Press "Restart".
-4. RUN THE PROGRAM
+4. MODIFY DEPENDENCIES
+- Locate the file `app/libs/jtds-1.3.1.jar`.
+- In Android Studio, select "File", then click "Project Structure".
+- Go to "Dependencies" section, then select "All Modules" in the Modules tab.
+- Under "All Dependencies", click on the `+` sign, and select "JAR/AAR Dependency".
+- Copy the file location of the .jar file located earlier. **IMPORTANT: The extension must be available at the end of the path!**
+- Click "OK".
+- Finish the setup by clicking "Apply", and "OK".
+5. RUN THE PROGRAM
 - Run the mobile program by use Android Studio's emulator, and press "Run". **ATTENTION: ONLY ANDROID STUDIO'S EMULATOR IS SUITABLE FOR THIS PROJECT.**
