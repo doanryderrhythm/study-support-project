@@ -14,21 +14,21 @@
 
         <include layout="@layout/tool_bar" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select a Student"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:padding="16dp"
+            android:background="@color/white" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/student_grades_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="match_parent"
             android:padding="8dp" />
-
-        <Button
-            android:id="@+id/submit_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Submit Grades"
-            android:textAllCaps="false"
-            android:backgroundTint="@color/green_primary"
-            android:layout_margin="16dp" />
 
     </LinearLayout>
 

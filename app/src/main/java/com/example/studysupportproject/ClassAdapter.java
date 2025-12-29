@@ -9,16 +9,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import java.util.Map;
 
 public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHolder> {
-    private List<String> classes;
+    private List<Map<String, Object>> classes;
     private OnClassClickListener listener;
 
     public interface OnClassClickListener {
-        void onClassClick(String className);
+        void onClassClick(Map<String, Object> classItem);
     }
 
-    public ClassAdapter(List<String> classes, OnClassClickListener listener) {
+    public ClassAdapter(List<Map<String, Object>> classes, OnClassClickListener listener) {
         this.classes = classes;
         this.listener = listener;
     }
@@ -33,9 +34,9 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
 
     @Override
     public void onBindViewHolder(@NonNull ClassViewHolder holder, int position) {
-        String className = classes.get(position);
-        holder.className.setText(className);
-        holder.itemView.setOnClickListener(v -> listener.onClassClick(className));
+        Map<String, Object> classItem = classes.get(position);
+        holder.className.setText((String) classItem.get("name"));
+        holder.itemView.setOnClickListener(v -> listener.onClassClick(classItem));
     }
 
     @Override
@@ -43,7 +44,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         return classes.size();
     }
 
-    public void updateList(List<String> newList) {
+    public void updateList(List<Map<String, Object>> newList) {
         this.classes = newList;
         notifyDataSetChanged();
     }

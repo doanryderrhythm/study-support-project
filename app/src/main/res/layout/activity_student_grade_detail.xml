@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".StudentGradeDetailActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <include layout="@layout/tool_bar" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Quá trình Grade Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@color/white"
+                    android:padding="16dp"
+                    android:layout_marginBottom="12dp"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Quá trình"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <EditText
+                        android:id="@+id/et_qua_trinh_grade"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:hint="Grade value"
+                        android:inputType="numberDecimal"
+                        android:padding="12dp"
+                        android:background="@drawable/edittext_bg"
+                        android:layout_marginBottom="8dp" />
+
+                    <EditText
+                        android:id="@+id/et_qua_trinh_notes"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:hint="Notes"
+                        android:inputType="text"
+                        android:padding="12dp"
+                        android:background="@drawable/edittext_bg"
+                        android:gravity="top" />
+
+                </LinearLayout>
+
+                <!-- Giữa kỳ Grade Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@color/white"
+                    android:padding="16dp"
+                    android:layout_marginBottom="12dp"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Giữa kỳ"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <EditText
+                        android:id="@+id/et_giua_ky_grade"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:hint="Grade value"
+                        android:inputType="numberDecimal"
+                        android:padding="12dp"
+                        android:background="@drawable/edittext_bg"
+                        android:layout_marginBottom="8dp" />
+
+                    <EditText
+                        android:id="@+id/et_giua_ky_notes"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:hint="Notes"
+                        android:inputType="text"
+                        android:padding="12dp"
+                        android:background="@drawable/edittext_bg"
+                        android:gravity="top" />
+
+                </LinearLayout>
+
+                <!-- Cuối kỳ Grade Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@color/white"
+                    android:padding="16dp"
+                    android:layout_marginBottom="12dp"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Cuối kỳ"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <EditText
+                        android:id="@+id/et_cuoi_ky_grade"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:hint="Grade value"
+                        android:inputType="numberDecimal"
+                        android:padding="12dp"
+                        android:background="@drawable/edittext_bg"
+                        android:layout_marginBottom="8dp" />
+
+                    <EditText
+                        android:id="@+id/et_cuoi_ky_notes"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:hint="Notes"
+                        android:inputType="text"
+                        android:padding="12dp"
+                        android:background="@drawable/edittext_bg"
+                        android:gravity="top" />
+
+                </LinearLayout>
+
+                <!-- Thực hành Grade Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@color/white"
+                    android:padding="16dp"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Thực hành"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <EditText
+                        android:id="@+id/et_thuc_hanh_grade"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:hint="Grade value"
+                        android:inputType="numberDecimal"
+                        android:padding="12dp"
+                        android:background="@drawable/edittext_bg"
+                        android:layout_marginBottom="8dp" />
+
+                    <EditText
+                        android:id="@+id/et_thuc_hanh_notes"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:hint="Notes"
+                        android:inputType="text"
+                        android:padding="12dp"
+                        android:background="@drawable/edittext_bg"
+                        android:gravity="top" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <Button
+            android:id="@+id/submit_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Grades"
+            android:textAllCaps="false"
+            android:backgroundTint="@color/green_primary"
+            android:layout_margin="16dp" />
+
+    </LinearLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/nav_menu" />
+
+</androidx.drawerlayout.widget.DrawerLayout>
