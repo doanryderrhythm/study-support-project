@@ -408,7 +408,7 @@ public class DatabaseHelper {
     /**
      * Tạo post
      */
-    public long createPost(String title, String content, int authorId, String postType) {
+    public long createPost(String title, String content, int authorId, String postType, int privacyType) {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -421,12 +421,13 @@ public class DatabaseHelper {
                 return -1;
             }
 
-            String query = "{CALL CreatePost(?, ?, ?, ?)}";
+            String query = "{CALL CreatePost(?, ?, ?, ?, ?)}";
             stmt = con.prepareStatement(query);
             stmt.setString(1, title);
             stmt.setString(2, content);
             stmt.setInt(3, authorId);
             stmt.setString(4, postType);
+            stmt.setInt(5, privacyType);
 
             rs = stmt.executeQuery();
             if (rs.next()) {
@@ -444,7 +445,7 @@ public class DatabaseHelper {
     /**
      * Cập nhật post với post_type
      */
-    public boolean updatePost(int postId, String title, String content, String postType) {
+    public boolean updatePost(int postId, String title, String content, String postType, int privacyType) {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -457,12 +458,13 @@ public class DatabaseHelper {
                 return false;
             }
 
-            String query = "{CALL UpdatePost(?, ?, ?, ?)}";
+            String query = "{CALL UpdatePost(?, ?, ?, ?, ?)}";
             stmt = con.prepareStatement(query);
             stmt.setInt(1, postId);
             stmt.setString(2, title);
             stmt.setString(3, content);
             stmt.setString(4, postType);
+            stmt.setInt(5, privacyType);
 
             boolean hasResults = stmt.execute();
 
@@ -504,6 +506,7 @@ public class DatabaseHelper {
             String query = "SELECT p.*, u.username, u.full_name " +
                         "FROM posts p " +
                         "LEFT JOIN users u ON p.author_id = u.id " +
+                        "WHERE p.is_published = 1 " +
                         "ORDER BY p.created_at DESC";
             stmt = con.prepareStatement(query);
             rs = stmt.executeQuery();

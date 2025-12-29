@@ -103,6 +103,39 @@
                     android:text="Điểm" />
             </RadioGroup>
 
+            <!-- Privacy Selection -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Quyền riêng tư"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#212121"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/rgPrivacyType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <RadioButton
+                    android:id="@+id/rbPublic"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Công khai"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/rbPrivate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Riêng tư" />
+            </RadioGroup>
+
             <!-- Post Title -->
             <TextView
                 android:layout_width="wrap_content"

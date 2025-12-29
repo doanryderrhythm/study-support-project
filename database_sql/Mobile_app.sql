@@ -257,11 +257,12 @@ CREATE PROCEDURE CreatePost
     @title NVARCHAR(255),
     @content NTEXT,
     @author_id INT,
-    @post_type NVARCHAR(50) = N'general'
+    @post_type NVARCHAR(50) = N'general',
+    @privacy_type INT
 AS
 BEGIN
     INSERT INTO posts (title, content, author_id, post_type, is_published, published_at)
-    VALUES (@title, @content, @author_id, @post_type, 1, GETDATE());
+    VALUES (@title, @content, @author_id, @post_type, @privacy_type, GETDATE());
     
     SELECT SCOPE_IDENTITY() as post_id;
 END;
@@ -272,7 +273,8 @@ CREATE PROCEDURE UpdatePost
     @post_id INT,
     @title NVARCHAR(255),
     @content NTEXT,
-    @post_type NVARCHAR(50) = NULL
+    @post_type NVARCHAR(50) = NULL,
+    @privacy_type INT
 AS
 BEGIN
     -- Check if post exists
@@ -288,6 +290,7 @@ BEGIN
         SET title = @title,
             content = @content,
             post_type = @post_type,
+            is_published = @privacy_type,
             updated_at = GETDATE()
         WHERE id = @post_id;
     END

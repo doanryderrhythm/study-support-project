@@ -17,8 +17,9 @@ import androidx.appcompat.app.AppCompatActivity;
 public class CreatePostActivity extends AppCompatActivity {
     private TextView tvTitle;
     private EditText etPostTitle, etPostContent;
-    private RadioGroup rgPostType;
+    private RadioGroup rgPostType, rgPrivacyType;
     private RadioButton rbGeneral, rbAnnouncement, rbGrade;
+    private RadioButton rbPublic, rbPrivate;
     private Button btnCancel, btnPublish;
 
     private DatabaseHelper dbHelper;
@@ -70,9 +71,12 @@ public class CreatePostActivity extends AppCompatActivity {
         etPostTitle = findViewById(R.id.etPostTitle);
         etPostContent = findViewById(R.id.etPostContent);
         rgPostType = findViewById(R.id.rgPostType);
+        rgPrivacyType = findViewById(R.id.rgPrivacyType);
         rbGeneral = findViewById(R.id.rbGeneral);
         rbAnnouncement = findViewById(R.id.rbAnnouncement);
         rbGrade = findViewById(R.id.rbGrade);
+        rbPrivate = findViewById(R.id.rbPrivate);
+        rbPublic = findViewById(R.id.rbPublic);
         btnCancel = findViewById(R.id.btnCancel);
         btnPublish = findViewById(R.id.btnPublish);
 
@@ -117,6 +121,13 @@ public class CreatePostActivity extends AppCompatActivity {
                             rbGrade.setChecked(true);
                             break;
                     }
+
+                    if (post.isPublished()) {
+                        rbPublic.setChecked(true);
+                    }
+                    else {
+                        rbPrivate.setChecked(true);
+                    }
                 } else {
                     Toast.makeText(this, "Không tìm thấy bài viết", Toast.LENGTH_SHORT).show();
                     finish();
@@ -129,6 +140,7 @@ public class CreatePostActivity extends AppCompatActivity {
         String title = etPostTitle.getText().toString().trim();
         String content = etPostContent.getText().toString().trim();
         String postType = getSelectedPostType();
+        int privacyType = getSelectedPrivacy();
 
         if (title.isEmpty()) {
             etPostTitle.setError("Tiêu đề là bắt buộc");
@@ -147,7 +159,7 @@ public class CreatePostActivity extends AppCompatActivity {
         btnPublish.setText("Đăng");
 
         new Thread(() -> {
-            long postId = dbHelper.createPost(title, content, currentUserId, postType);
+            long postId = dbHelper.createPost(title, content, currentUserId, postType, privacyType);
 
             runOnUiThread(() -> {
                 btnPublish.setEnabled(true);
@@ -168,6 +180,7 @@ public class CreatePostActivity extends AppCompatActivity {
         String title = etPostTitle.getText().toString().trim();
         String content = etPostContent.getText().toString().trim();
         String postType = getSelectedPostType();
+        int privacyType = getSelectedPrivacy();
 
         if (title.isEmpty()) {
             etPostTitle.setError("Tiêu đề là bắt buộc");
@@ -185,7 +198,7 @@ public class CreatePostActivity extends AppCompatActivity {
         btnPublish.setText("Cập nhật");
 
         new Thread(() -> {
-            boolean success = dbHelper.updatePost(editPostId, title, content, postType);
+            boolean success = dbHelper.updatePost(editPostId, title, content, postType, privacyType);
 
             runOnUiThread(() -> {
                 btnPublish.setEnabled(true);
@@ -214,5 +227,17 @@ public class CreatePostActivity extends AppCompatActivity {
         }
 
         return "";
+    }
+
+    private int getSelectedPrivacy() {
+        int selectedId = rgPrivacyType.getCheckedRadioButtonId();
+
+        if (selectedId == R.id.rbPublic) {
+            return 1;
+        } else if (selectedId == R.id.rbPrivate) {
+            return 0;
+        }
+
+        return -1;
     }
 }
