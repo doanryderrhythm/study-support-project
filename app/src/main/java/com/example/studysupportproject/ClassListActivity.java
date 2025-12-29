@@ -92,30 +92,34 @@ public class ClassListActivity extends AppCompatActivity {
             try {
                 int teacherId = SharedPrefManager.getInstance(this).getUser().getId();
 
-                String query = "SELECT DISTINCT c.class_name, c.id " +
+                String query = "SELECT c.id, c.class_name " +
                         "FROM classes c " +
                         "INNER JOIN class_teachers ct ON c.id = ct.class_id " +
                         "WHERE ct.teacher_id = " + teacherId + " " +
                         "AND c.semester_id = " + semesterId + " " +
                         "ORDER BY c.class_name";
 
-                List<String> classes = new ArrayList<>();
-                List<java.util.Map<String, String>> results = conSQL.executeQuery(query);
+                java.util.List<java.util.Map<String, String>> results = conSQL.executeQuery(query);
+                java.util.List<java.util.Map<String, Object>> classesWithIds = new java.util.ArrayList<>();
 
                 if (results != null) {
                     for (java.util.Map<String, String> row : results) {
-                        classes.add(row.getOrDefault("class_name", "Unknown"));
+                        java.util.Map<String, Object> classItem = new java.util.HashMap<>();
+                        classItem.put("id", Integer.parseInt(row.getOrDefault("id", "0")));
+                        classItem.put("name", row.getOrDefault("class_name", "Unknown"));
+                        classesWithIds.add(classItem);
                     }
                 }
 
                 runOnUiThread(() -> {
-                    if (classes.isEmpty()) {
+                    if (classesWithIds.isEmpty()) {
                         Toast.makeText(ClassListActivity.this, "No classes found", Toast.LENGTH_SHORT).show();
                     } else {
-                        classAdapter = new ClassAdapter(classes, className -> {
+                        classAdapter = new ClassAdapter(classesWithIds, classItem -> {
                             Intent intent = new Intent(ClassListActivity.this, StudentGradesEditActivity.class);
                             intent.putExtra("semester_name", semesterName);
-                            intent.putExtra("class_name", className);
+                            intent.putExtra("class_name", (String) classItem.get("name"));
+                            intent.putExtra("class_id", (int) classItem.get("id"));
                             startActivity(intent);
                         });
                         classRecyclerView.setAdapter(classAdapter);

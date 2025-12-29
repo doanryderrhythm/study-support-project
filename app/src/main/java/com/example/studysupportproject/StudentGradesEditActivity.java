@@ -3,7 +3,6 @@ package com.example.studysupportproject;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -20,16 +19,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StudentGradesEditActivity extends AppCompatActivity {
-    private RecyclerView studentGradesRecyclerView;
-    private StudentGradeEditAdapter gradeEditAdapter;
+    private RecyclerView studentListRecyclerView;
+    private StudentListAdapter studentListAdapter;
     private DrawerLayout drawerLayout;
     private ImageButton menuButton;
     private NavigationView navView;
-    private Button submitButton;
     private ConSQL conSQL;
     private String semesterName;
     private String className;
-    private List<Grade> grades;
+    private int classId;
+    private List<User> students;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,32 +37,31 @@ public class StudentGradesEditActivity extends AppCompatActivity {
 
         semesterName = getIntent().getStringExtra("semester_name");
         className = getIntent().getStringExtra("class_name");
+        classId = getIntent().getIntExtra("class_id", -1);
 
         // Setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(className);
+            getSupportActionBar().setTitle("Edit Grades - " + className);
         }
 
         // Setup drawer
         drawerLayout = findViewById(R.id.drawer_layout);
         menuButton = findViewById(R.id.menu_button);
         navView = findViewById(R.id.nav_view);
-        submitButton = findViewById(R.id.submit_button);
 
         // Setup RecyclerView
-        studentGradesRecyclerView = findViewById(R.id.student_grades_recycler_view);
-        studentGradesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        studentListRecyclerView = findViewById(R.id.student_grades_recycler_view);
+        studentListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         conSQL = new ConSQL();
-        grades = new ArrayList<>();
+        students = new ArrayList<>();
 
         setupMenuButton();
         setupNavigationViewMenu();
-        setupSubmitButton();
-        loadStudentGrades();
+        loadStudentsInClass();
     }
 
     private void setupMenuButton() {
@@ -93,88 +91,44 @@ public class StudentGradesEditActivity extends AppCompatActivity {
         });
     }
 
-    private void setupSubmitButton() {
-        submitButton.setOnClickListener(v -> submitGrades());
-    }
-
-    private void loadStudentGrades() {
+    private void loadStudentsInClass() {
         new Thread(() -> {
             try {
-                int teacherId = SharedPrefManager.getInstance(this).getUser().getId();
-
-                String query = "SELECT g.id, g.student_id, g.class_id, " +
-                        "g.grade_value, g.grade_type, g.notes, " +
-                        "c.semester_id, c.class_name, s.semester_name, g.created_at, g.updated_at " +
-                        "FROM grades g " +
-                        "INNER JOIN classes c ON g.class_id = c.id " +
-                        "LEFT JOIN semesters s ON c.semester_id = s.id " +
-                        "LEFT JOIN class_teachers ct ON c.id = ct.class_id " +
-                        "WHERE ct.teacher_id = " + teacherId + " " +
-                        "AND c.class_name = '" + className + "' " +
-                        "AND s.semester_name = '" + semesterName + "' " +
-                        "ORDER BY g.student_id, c.class_name";
+                // Get all students in this class
+                String query = "SELECT u.id, u.full_name, u.username, u.email " +
+                        "FROM users u " +
+                        "INNER JOIN class_students cs ON u.id = cs.student_id " +
+                        "WHERE cs.class_id = " + classId + " " +
+                        "ORDER BY u.full_name";
 
                 List<java.util.Map<String, String>> results = conSQL.executeQuery(query);
 
                 if (results != null) {
                     for (java.util.Map<String, String> row : results) {
-                        Grade grade = new Grade(
-                                Integer.parseInt(row.getOrDefault("id", "0")),
-                                Integer.parseInt(row.getOrDefault("student_id", "0")),
-                                Integer.parseInt(row.getOrDefault("class_id", "0")),
-                                row.getOrDefault("class_name", ""), // Use class_name instead of subject_name
-                                Double.parseDouble(row.getOrDefault("grade_value", "0")),
-                                row.getOrDefault("grade_type", ""),
-                                Integer.parseInt(row.getOrDefault("semester_id", "0")),
-                                row.getOrDefault("semester_name", ""),
-                                "", 
-                                0, 
-                                row.getOrDefault("notes", ""),
-                                row.getOrDefault("created_at", ""),
-                                row.getOrDefault("updated_at", "")
-                        );
-                        grades.add(grade);
+                        User student = new User();
+                        student.setId(Integer.parseInt(row.getOrDefault("id", "0")));
+                        student.setFullName(row.getOrDefault("full_name", "Unknown"));
+                        student.setUsername(row.getOrDefault("username", ""));
+                        student.setEmail(row.getOrDefault("email", ""));
+                        students.add(student);
                     }
                 }
 
                 runOnUiThread(() -> {
-                    if (grades.isEmpty()) {
-                        Toast.makeText(StudentGradesEditActivity.this, "No grades found", Toast.LENGTH_SHORT).show();
+                    if (students.isEmpty()) {
+                        Toast.makeText(StudentGradesEditActivity.this, "No students found in this class", Toast.LENGTH_SHORT).show();
                     } else {
-                        gradeEditAdapter = new StudentGradeEditAdapter(grades, (grade, position) -> {
-                            // Grade updated in adapter
-                            Toast.makeText(StudentGradesEditActivity.this,
-                                    "Grade updated for student: " + grade.getStudentId(),
-                                    Toast.LENGTH_SHORT).show();
+                        studentListAdapter = new StudentListAdapter(students, student -> {
+                            // Open grade editing page for this student
+                            Intent intent = new Intent(StudentGradesEditActivity.this, StudentGradeDetailActivity.class);
+                            intent.putExtra("student_id", student.getId());
+                            intent.putExtra("student_name", student.getFullName());
+                            intent.putExtra("class_id", classId);
+                            intent.putExtra("class_name", className);
+                            intent.putExtra("semester_name", semesterName);
+                            startActivity(intent);
                         });
-                        studentGradesRecyclerView.setAdapter(gradeEditAdapter);
-                    }
-                });
-            } catch (Exception e) {
-                Toast.makeText(StudentGradesEditActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        }).start();
-    }
-
-    private void submitGrades() {
-        new Thread(() -> {
-            try {
-                boolean allSuccess = true;
-                for (Grade grade : grades) {
-                    String updateQuery = "UPDATE grades SET grade_value = " + grade.getGradeValue() + 
-                            " WHERE id = " + grade.getId();
-                    boolean success = conSQL.executeUpdate(updateQuery);
-                    if (!success) {
-                        allSuccess = false;
-                    }
-                }
-                boolean finalAllSuccess = allSuccess;
-                runOnUiThread(() -> {
-                    if (finalAllSuccess) {
-                        Toast.makeText(StudentGradesEditActivity.this, "Grades submitted successfully", Toast.LENGTH_SHORT).show();
-                        onBackPressed();
-                    } else {
-                        Toast.makeText(StudentGradesEditActivity.this, "Some grades failed to submit", Toast.LENGTH_SHORT).show();
+                        studentListRecyclerView.setAdapter(studentListAdapter);
                     }
                 });
             } catch (Exception e) {
