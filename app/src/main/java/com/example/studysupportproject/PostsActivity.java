@@ -13,14 +13,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,6 +42,12 @@ public class PostsActivity extends AppCompatActivity {
     private Animation fabOpen, fabClose;
     private PostsAdapter postsAdapter;
     private DatabaseHelper dbHelper;
+    
+    private DrawerLayout drawerLayout;
+    private ImageButton menuButton;
+    private NavigationView navView;
+    private ImageButton navHome, navStudy, navProfile;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,15 +58,18 @@ public class PostsActivity extends AppCompatActivity {
 
         rvPosts = findViewById(R.id.rvPosts);
         llEmptyState = findViewById(R.id.llEmptyState);
+        
+        // Toolbar and navigation
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        menuButton = findViewById(R.id.menu_button);
+        navView = findViewById(R.id.nav_view);
 
-        btnBack = findViewById(R.id.btnBackPosts);
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
+        setupMenuButton();
+        setupNavigationViewMenu();
         setupFabMenu();
         setupRecyclerView();
         loadPosts();
@@ -148,5 +160,50 @@ public class PostsActivity extends AppCompatActivity {
             llEmptyState.setVisibility(View.GONE);
             postsAdapter.updatePosts(posts);
         }
+    }
+
+    private void setupMenuButton() {
+        menuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.END);
+            }
+        });
+    }
+
+    private void setupNavigationViewMenu() {
+        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(android.view.MenuItem item) {
+                int itemId = item.getItemId();
+
+                if (itemId == R.id.menu_home) {
+                    Intent intent = new Intent(PostsActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.menu_posts) {
+                    // Posts button - stay in PostsActivity
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.menu_study) {
+                    Intent intent = new Intent(PostsActivity.this, StudentGradesActivity.class);
+                    startActivity(intent);
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.nav_account) {
+                    Intent intent = new Intent(PostsActivity.this, AccountMenuActivity.class);
+                    startActivity(intent);
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                }
+
+                drawerLayout.closeDrawer(GravityCompat.END);
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }

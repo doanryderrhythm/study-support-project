@@ -28,6 +28,10 @@ INSERT INTO classes (class_name, school_id) VALUES
 (N'11B2', 3),
 (N'12B3', 3);
 
+-- Thêm admin
+INSERT INTO users (username, password, email, full_name, date_of_birth, class_id, role_id, phone, address, is_active) VALUES
+(N'admin1', N'admin123', N'admin1@gmail.com', N'Nguyễn Văn B', '1985-03-15', 1, 2, N'0901334567', N'128 Lý Thường Kiệt, Q10, TP.HCM', 1)
+
 -- Thêm giáo viên
 INSERT INTO users (username, password, email, full_name, date_of_birth, class_id, role_id, phone, address, is_active) VALUES
 -- Giáo viên UIT
