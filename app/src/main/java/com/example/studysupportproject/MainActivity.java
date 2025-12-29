@@ -250,8 +250,17 @@ public class MainActivity extends AppCompatActivity {
         navStudy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, StudentGradesActivity.class);
-                startActivity(intent);
+                Intent intent;
+                if (userRole != null) {
+                    if (userRole.equals("teacher") || userRole.equals("admin")) {
+                        intent = new Intent(MainActivity.this, GradeManagementActivity.class);
+                    } else {
+                        intent = new Intent(MainActivity.this, StudentGradesActivity.class);
+                    }
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(MainActivity.this, "Unknown user role", Toast.LENGTH_SHORT).show();
+                }
                 drawerLayout.closeDrawer(GravityCompat.END);
             }
         });
