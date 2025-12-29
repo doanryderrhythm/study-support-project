@@ -17,6 +17,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
+import androidx.annotation.NonNull;
+import android.view.MenuItem;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -133,6 +135,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(MainActivity.this, "Màn hình hồ sơ", Toast.LENGTH_SHORT).show();
+            }
+        });
+        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+
+                if (itemId == R.id.nav_account) {
+                    Intent intent = new Intent(MainActivity.this, AccountMenuActivity.class);
+                    startActivity(intent);
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                    return true;
+                }
+
+                return false;
             }
         });
     }

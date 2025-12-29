@@ -46,7 +46,26 @@
             android:exported="false" />
         <activity android:name=".OtpVerificationActivity" />
         <activity android:name=".ResetPasswordActivity" />
+        <!-- Account/Settings Activities -->
+        <activity
+            android:name=".AccountMenuActivity"
+            android:exported="true" />
 
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="true" />
+
+        <activity
+            android:name=".SocialNetworkSettingsActivity"
+            android:exported="true" />
+        <activity
+            android:name=".TestLaunchActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
