@@ -95,6 +95,7 @@ public class ProfilePostsActivity extends AppCompatActivity {
         postsAdapter = new PostsAdapter(new ArrayList<>(), post -> {
             Intent intent = new Intent(this, PostDetailActivity.class);
             intent.putExtra("post_id", post.getId());
+            intent.putExtra("user_id", post.getAuthorId());
             startActivity(intent);
         });
 

@@ -1,6 +1,7 @@
 package com.example.studysupportproject;
 
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,12 +57,14 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.PostViewHold
 
     class PostViewHolder extends RecyclerView.ViewHolder {
         CardView postCardView;
+        TextView tvPrivacyStatus;
         TextView tvTitle, tvContent, tvPostType;
         TextView tvAuthor, tvAdditionalInfo;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
             postCardView = (CardView) itemView;
+            tvPrivacyStatus = itemView.findViewById(R.id.tvPrivacyStatus);
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvContent = itemView.findViewById(R.id.tvContent);
             tvPostType = itemView.findViewById(R.id.tvPostType);
@@ -72,12 +75,33 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.PostViewHold
         public void bind(Post post) {
             tvTitle.setText(post.getTitle());
             tvContent.setText(post.getContent());
-            tvPostType.setText(post.getPostType().toUpperCase());
+
+            String postType = post.getPostType();
+            switch (postType) {
+                case "general":
+                    tvPostType.setText("CHUNG");
+                    break;
+                case "announcement":
+                    tvPostType.setText("THÔNG BÁO");
+                    break;
+                case "grade":
+                    tvPostType.setText("ĐIỂM");
+                    break;
+            }
 
             String authorUsername = post.getUsername();
             if (authorUsername != null) {
                 String authorString = "Author: " + authorUsername;
                 tvAuthor.setText(authorString);
+            }
+
+            boolean isPublished = post.isPublished();
+            if (isPublished) {
+                tvPrivacyStatus.setText("Công khai");
+                tvPrivacyStatus.setTextColor(Color.parseColor("#4CAF50"));
+            } else {
+                tvPrivacyStatus.setText("Riêng tư");
+                tvPrivacyStatus.setTextColor(Color.parseColor("#FF9800"));
             }
 
             // Change background color based on post type
