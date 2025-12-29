@@ -25,6 +25,7 @@ public class GradeManagementActivity extends AppCompatActivity {
     private ImageButton menuButton;
     private NavigationView navView;
     private ConSQL conSQL;
+    private List<Semester> semesterList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,28 +85,41 @@ public class GradeManagementActivity extends AppCompatActivity {
             try {
                 int teacherId = SharedPrefManager.getInstance(this).getUser().getId();
 
-                String query = "SELECT DISTINCT s.semester_name " +
+                String query = "SELECT DISTINCT s.id, s.semester_name " +
                         "FROM semesters s " +
                         "INNER JOIN classes c ON s.id = c.semester_id " +
                         "INNER JOIN class_teachers ct ON c.id = ct.class_id " +
                         "WHERE ct.teacher_id = " + teacherId + " " +
                         "ORDER BY s.semester_name";
 
-                List<String> semesters = new ArrayList<>();
+                semesterList = new ArrayList<>();
+                List<String> semesterNames = new ArrayList<>();
                 List<java.util.Map<String, String>> results = conSQL.executeQuery(query);
 
                 if (results != null) {
                     for (java.util.Map<String, String> row : results) {
-                        semesters.add(row.getOrDefault("semester_name", "Unknown"));
+                        int semesterId = Integer.parseInt(row.getOrDefault("id", "0"));
+                        String semesterName = row.getOrDefault("semester_name", "Unknown");
+                        semesterList.add(new Semester(semesterId, semesterName));
+                        semesterNames.add(semesterName);
                     }
                 }
 
                 runOnUiThread(() -> {
-                    if (semesters.isEmpty()) {
+                    if (semesterNames.isEmpty()) {
                         Toast.makeText(GradeManagementActivity.this, "No semesters found", Toast.LENGTH_SHORT).show();
                     } else {
-                        semesterAdapter = new SemesterAdapter(semesters, semesterName -> {
+                        semesterAdapter = new SemesterAdapter(semesterNames, semesterName -> {
+                            // Find semester id by name
+                            int semesterId = 0;
+                            for (Semester s : semesterList) {
+                                if (s.getName().equals(semesterName)) {
+                                    semesterId = s.getId();
+                                    break;
+                                }
+                            }
                             Intent intent = new Intent(GradeManagementActivity.this, ClassListActivity.class);
+                            intent.putExtra("semester_id", semesterId);
                             intent.putExtra("semester_name", semesterName);
                             startActivity(intent);
                         });

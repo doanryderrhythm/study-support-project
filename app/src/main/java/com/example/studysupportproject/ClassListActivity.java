@@ -26,12 +26,14 @@ public class ClassListActivity extends AppCompatActivity {
     private NavigationView navView;
     private ConSQL conSQL;
     private String semesterName;
+    private int semesterId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_class_list);
 
+        semesterId = getIntent().getIntExtra("semester_id", -1);
         semesterName = getIntent().getStringExtra("semester_name");
 
         // Setup toolbar
@@ -94,7 +96,7 @@ public class ClassListActivity extends AppCompatActivity {
                         "FROM classes c " +
                         "INNER JOIN class_teachers ct ON c.id = ct.class_id " +
                         "WHERE ct.teacher_id = " + teacherId + " " +
-                        "AND c.semester_id = (SELECT id FROM semesters WHERE semester_name = '" + semesterName + "') " +
+                        "AND c.semester_id = " + semesterId + " " +
                         "ORDER BY c.class_name";
 
                 List<String> classes = new ArrayList<>();
