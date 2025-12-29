@@ -5,16 +5,25 @@
         android:icon="@drawable/ic_home"
         android:title="Home" />
     <item
+        android:id="@+id/menu_posts"
+        android:icon="@drawable/ic_notifications"
+        android:title="Posts" />
+    <item
         android:id="@+id/menu_study"
         android:icon="@drawable/ic_study"
         android:title="Study" />
     <item
         android:id="@+id/menu_profile"
         android:icon="@drawable/ic_profile"
-        android:title="Profile" />
+        android:title="Profile"
+        android:visible="false"/>
     <item
-        android:id="@+id/nav_account"
+        android:id="@+id/menu_account"
         android:icon="@drawable/ic_account"
-        android:title="Tài khoản" />
+        android:title="Account" />
+    <item
+        android:id="@+id/menu_logout"
+        android:icon="@drawable/baseline_logout_24"
+        android:title="Logout" />
 </menu>
 

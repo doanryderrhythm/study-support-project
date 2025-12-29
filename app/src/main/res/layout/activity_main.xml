@@ -5,81 +5,112 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".MainActivity">
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:elevation="4dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center_vertical|end"
-                android:paddingEnd="16dp">
-
-                <ImageButton
-                    android:id="@+id/menu_button"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@drawable/ic_menu"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Open menu"
-                    android:scaleType="centerInside" />
-
-            </LinearLayout>
-
-        </androidx.appcompat.widget.Toolbar>
+        <include layout="@layout/tool_bar" />
 
         <FrameLayout
-            android:id="@+id/content_frame"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1">
+
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/swipe_refresh_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:id="@+id/schedules_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <!--                <TextView-->
+                    <!--                    android:layout_width="match_parent"-->
+                    <!--                    android:layout_height="wrap_content"-->
+                    <!--                    android:text="My Schedules"-->
+                    <!--                    android:textSize="18sp"-->
+                    <!--                    android:textStyle="bold"-->
+                    <!--                    android:textColor="#333333"-->
+                    <!--                    android:padding="16dp"-->
+                    <!--                    android:background="#F9F9F9" />-->
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_schedules"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:padding="8dp" />
+
+                    <TextView
+                        android:id="@+id/tv_empty_state"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="No schedules yet"
+                        android:textColor="#999999"
+                        android:textSize="16sp"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_add_schedule"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="16dp"
+                android:contentDescription="Add schedule"
+                android:src="@drawable/ic_add"
+                app:backgroundTint="#c587ff" />
+
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:orientation="horizontal"
             android:background="#F5F5F5"
-            android:elevation="8dp">
+            android:elevation="8dp"
+            android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/nav_home"
+                android:id="@+id/nav_post"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@drawable/ic_home"
                 android:background="?attr/selectableItemBackground"
-                android:contentDescription="Home" />
+                android:contentDescription="Posts"
+                android:src="@drawable/ic_notifications" />
+
 
             <ImageButton
                 android:id="@+id/nav_study"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@drawable/ic_study"
                 android:background="?attr/selectableItemBackground"
-                android:contentDescription="Study" />
+                android:contentDescription="Study"
+                android:src="@drawable/ic_study" />
 
             <ImageButton
                 android:id="@+id/nav_profile"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@drawable/ic_profile"
                 android:background="?attr/selectableItemBackground"
-                android:contentDescription="Profile" />
+                android:contentDescription="Account"
+                android:src="@drawable/ic_account" />
 
         </LinearLayout>
+
 
     </LinearLayout>
 

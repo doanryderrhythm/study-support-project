@@ -6,12 +6,18 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.navigation.NavigationView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,6 +36,11 @@ public class PostDetailActivity extends AppCompatActivity {
     private int postId;
     private int postAuthorId;
     private int currentUserId;
+    private String userRole;
+    
+    private DrawerLayout drawerLayout;
+    private ImageButton menuButton;
+    private NavigationView navView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +48,10 @@ public class PostDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_post_detail);
 
         dbHelper = new DatabaseHelper();
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         postId = getIntent().getIntExtra("post_id", -1);
         if (postId == -1) {
@@ -45,7 +60,14 @@ public class PostDetailActivity extends AppCompatActivity {
             return;
         }
 
+        // Setup drawer and navigation
+        drawerLayout = findViewById(R.id.drawer_layout);
+        menuButton = findViewById(R.id.menu_button);
+        navView = findViewById(R.id.nav_view);
+
         initViews();
+        setupMenuButton();
+        setupNavigationViewMenu();
         setupRecyclerView();
         loadPostDetails();
         loadComments();
@@ -201,5 +223,67 @@ public class PostDetailActivity extends AppCompatActivity {
         } catch (Exception e) {
             return dateString;
         }
+    }
+
+    private void setupMenuButton() {
+        menuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.END);
+            }
+        });
+    }
+
+    private void setupNavigationViewMenu() {
+        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(android.view.MenuItem item) {
+                int itemId = item.getItemId();
+
+                if (itemId == R.id.menu_home) {
+                    Intent intent = new Intent(PostDetailActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.menu_posts) {
+                    getOnBackPressedDispatcher().onBackPressed();
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.menu_study) {
+                    Intent intent;
+                    User savedUser = SharedPrefManager.getInstance(PostDetailActivity.this).getUser();
+                    userRole = savedUser != null ? savedUser.getRole() : "student";
+                    if (userRole != null) {
+                        if (userRole.equals("teacher") || userRole.equals("admin")) {
+                            intent = new Intent(PostDetailActivity.this, GradeManagementActivity.class);
+                        } else {
+                            intent = new Intent(PostDetailActivity.this, StudentGradesActivity.class);
+                        }
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(PostDetailActivity.this, "Unknown user role", Toast.LENGTH_SHORT).show();
+                    }
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.menu_account) {
+                    Intent intent = new Intent(PostDetailActivity.this, AccountMenuActivity.class);
+                    startActivity(intent);
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.menu_logout) {
+                    SharedPrefManager.getInstance(PostDetailActivity.this).logout();
+                    Intent intent = new Intent(PostDetailActivity.this, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                }
+
+                drawerLayout.closeDrawer(GravityCompat.END);
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        getOnBackPressedDispatcher().onBackPressed();
+        return true;
     }
 }

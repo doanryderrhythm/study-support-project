@@ -5,7 +5,8 @@
     android:background="?attr/colorPrimary"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:fitsSystemWindows="true">
 
     <ImageView
         android:id="@+id/ivProfilePicture"

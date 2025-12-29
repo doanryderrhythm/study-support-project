@@ -195,10 +195,17 @@ public class DatabaseHelper {
 
         try {
             con = conSQL.conclass();
-            if (con == null) return null;
+            if (con == null) {
+                Log.e(TAG, "Connection is null in checkLogin");
+                return null;
+            }
 
             String query = "SELECT * FROM users WHERE (username = ? OR email = ?) AND password = ?";
             stmt = con.prepareStatement(query);
+            if (stmt == null) {
+                Log.e(TAG, "PreparedStatement is null in checkLogin");
+                return null;
+            }
             stmt.setString(1, usernameOrEmail);
             stmt.setString(2, usernameOrEmail);
             stmt.setString(3, password);
@@ -233,10 +240,17 @@ public class DatabaseHelper {
 
         try {
             con = conSQL.conclass();
-            if (con == null) return null;
+            if (con == null) {
+                Log.e(TAG, "Connection is null in getUserByEmail");
+                return null;
+            }
 
             String query = "SELECT * FROM users WHERE email = ?";
             stmt = con.prepareStatement(query);
+            if (stmt == null) {
+                Log.e(TAG, "PreparedStatement is null in getUserByEmail");
+                return null;
+            }
             stmt.setString(1, email);
 
             rs = stmt.executeQuery();
@@ -270,10 +284,17 @@ public class DatabaseHelper {
 
         try {
             con = conSQL.conclass();
-            if (con == null) return null;
+            if (con == null) {
+                Log.e(TAG, "Connection is null in getUserById");
+                return null;
+            }
 
-            String query = "SELECT * FROM users WHERE id = ?";
+            String query = "SELECT u.*, r.role_name FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.id = ?";
             stmt = con.prepareStatement(query);
+            if (stmt == null) {
+                Log.e(TAG, "PreparedStatement is null in getUserById");
+                return null;
+            }
             stmt.setInt(1, user_id);
 
             rs = stmt.executeQuery();
@@ -287,6 +308,7 @@ public class DatabaseHelper {
                 user.setAvatar(rs.getString("avatar") != null ? rs.getString("avatar") : "");
                 user.setPhone(rs.getString("phone") != null ? rs.getString("phone") : "");
                 user.setCreatedAt(rs.getString("created_at") != null ? rs.getString("created_at") : "");
+                user.setRole(rs.getString("role_name") != null ? rs.getString("role_name") : "student");
             }
         } catch (SQLException e) {
             Log.e(TAG, "Error getting user by id: " + e.getMessage());
@@ -784,6 +806,201 @@ public class DatabaseHelper {
         }
         return success;
     }
+
+    // ---------------------- SCHEDULES TABLE METHODS ----------------------
+
+    /**
+     * Lấy tất cả các lịch của người dùng, sắp xếp theo ngày tăng dần
+     */
+    public List<Schedule> getSchedulesForUser(int userId) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<Schedule> schedules = new ArrayList<>();
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) {
+                Log.e(TAG, "Connection is null");
+                return schedules;
+            }
+
+            String query = "SELECT * FROM personal_schedules " +
+                    "WHERE user_id = ? " +
+                    "ORDER BY schedule_date ASC, start_time ASC";
+
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, userId);
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Schedule schedule = new Schedule(
+                        rs.getInt("id"),
+                        rs.getInt("user_id"),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getString("schedule_date"),
+                        rs.getString("start_time"),
+                        rs.getString("end_time"),
+                        rs.getString("schedule_type"),
+                        rs.getString("created_at")
+                );
+                schedules.add(schedule);
+            }
+            Log.i(TAG, "Retrieved " + schedules.size() + " schedules for user " + userId);
+        } catch (SQLException e) {
+            Log.e(TAG, "Error getting schedules for user: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+        return schedules;
+    }
+
+    /**
+     * Thêm lịch mới cho người dùng
+     */
+    public long addSchedule(int userId, String title, String description, String scheduleDate,
+                           String startTime, String endTime, String scheduleType) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        long scheduleId = -1;
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) {
+                Log.e(TAG, "Connection is null");
+                return -1;
+            }
+
+            String query = "INSERT INTO personal_schedules (user_id, title, description, schedule_date, " +
+                    "start_time, end_time, schedule_type) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?); SELECT SCOPE_IDENTITY() as id";
+
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, userId);
+            stmt.setString(2, title);
+            stmt.setString(3, description);
+            stmt.setString(4, scheduleDate);
+            stmt.setString(5, startTime);
+            stmt.setString(6, endTime);
+            stmt.setString(7, scheduleType != null ? scheduleType : "personal");
+
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                scheduleId = rs.getLong("id");
+                Log.i(TAG, "Schedule added successfully with ID: " + scheduleId);
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error adding schedule: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+        return scheduleId;
+    }
+
+    /**
+     * Cập nhật lịch
+     */
+    public boolean updateSchedule(int scheduleId, String title, String description,
+                                 String scheduleDate, String startTime, String endTime, String scheduleType) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        boolean success = false;
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) return false;
+
+            String query = "UPDATE personal_schedules SET title = ?, description = ?, " +
+                    "schedule_date = ?, start_time = ?, end_time = ?, schedule_type = ? WHERE id = ?";
+
+            stmt = con.prepareStatement(query);
+            stmt.setString(1, title);
+            stmt.setString(2, description);
+            stmt.setString(3, scheduleDate);
+            stmt.setString(4, startTime);
+            stmt.setString(5, endTime);
+            stmt.setString(6, scheduleType != null ? scheduleType : "personal");
+            stmt.setInt(7, scheduleId);
+
+            int rowsAffected = stmt.executeUpdate();
+            success = rowsAffected > 0;
+            Log.i(TAG, "Schedule updated: " + success);
+        } catch (SQLException e) {
+            Log.e(TAG, "Error updating schedule: " + e.getMessage());
+        } finally {
+            closeResources(null, stmt, con);
+        }
+        return success;
+    }
+
+    /**
+     * Xóa lịch
+     */
+    public boolean deleteSchedule(int scheduleId) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        boolean success = false;
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) return false;
+
+            String query = "DELETE FROM personal_schedules WHERE id = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, scheduleId);
+
+            int rowsAffected = stmt.executeUpdate();
+            success = rowsAffected > 0;
+            Log.i(TAG, "Schedule deleted: " + success);
+        } catch (SQLException e) {
+            Log.e(TAG, "Error deleting schedule: " + e.getMessage());
+        } finally {
+            closeResources(null, stmt, con);
+        }
+        return success;
+    }
+
+    /**
+     * Lấy lịch theo ID
+     */
+    public Schedule getScheduleById(int scheduleId) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Schedule schedule = null;
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) return null;
+
+            String query = "SELECT * FROM personal_schedules WHERE id = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, scheduleId);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                schedule = new Schedule(
+                        rs.getInt("id"),
+                        rs.getInt("user_id"),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getString("schedule_date"),
+                        rs.getString("start_time"),
+                        rs.getString("end_time"),
+                        rs.getString("schedule_type"),
+                        rs.getString("created_at")
+                );
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error getting schedule by id: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+        return schedule;
+    }
+
     /**
      * Đóng tài nguyên database
      */

@@ -59,13 +59,25 @@
             android:name=".SocialNetworkSettingsActivity"
             android:exported="true" />
         <activity
-            android:name=".TestLaunchActivity"
+            android:name=".StudentGradeDetailActivity"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        </activity>        
+        <activity
+            android:name=".StudentGradesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".GradeManagementActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ClassListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".StudentGradesEditActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ScheduleDetailActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

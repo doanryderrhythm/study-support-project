@@ -6,16 +6,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 
 public class SocialNetworkSettingsActivity extends AppCompatActivity {
 
     private ImageButton btnBack;
-    private Switch swFacebook, swTwitter, swGoogle, swLinkedin;
+    private SwitchCompat swFacebook, swTwitter, swGoogle, swLinkedin;
     private Button btnSaveSettings;
     private LinearLayout socialNetworksContainer;
 

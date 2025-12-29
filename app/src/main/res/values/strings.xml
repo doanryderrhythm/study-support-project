@@ -1,4 +1,15 @@
 <resources>
     <string name="app_name">StudySupportProject</string>
     <string name="no_post_available">Không có bài viết nào.</string>
+    <string name="student_grades">Student Grades</string>
+
+    <string-array name="schedule_types">
+        <item>personal</item>
+        <item>study</item>
+        <item>meeting</item>
+        <item>work</item>
+        <item>teaching</item>
+        <item>group_work</item>
+        <item>exam</item>
+    </string-array>
 </resources>

@@ -1,6 +1,7 @@
 package com.example.studysupportproject;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
@@ -12,10 +13,15 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import androidx.annotation.NonNull;
 import android.view.MenuItem;
@@ -23,10 +29,11 @@ import android.view.MenuItem;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private View navHome;
+    private View navPost;
     private View navStudy;
     private View navProfile;
     private DrawerLayout drawerLayout;
@@ -36,8 +43,15 @@ public class MainActivity extends AppCompatActivity {
     private ImageView ivProfilePicture;
     private TextView tvProfileName;
 
+    private RecyclerView rvSchedules;
+    private TextView tvEmptyState;
+    private ScheduleAdapter scheduleAdapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
+
     private DatabaseHelper dbHelper;
     private int currentUserId;
+    private String userRole;
+    private FloatingActionButton fabAddSchedule;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,22 +67,56 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        // Toolbar and navigation
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("My Schedules");
+        }
+        drawerLayout = findViewById(R.id.drawer_layout);
+        menuButton = findViewById(R.id.menu_button);
+        navView = findViewById(R.id.nav_view);
+
         currentUserId = getSharedPreferences("UserPrefs", MODE_PRIVATE)
                 .getInt("user_id", -1);
 
-        drawerLayout = findViewById(R.id.drawer_layout);
-        menuButton = findViewById(R.id.menu_button);
-        navHome = findViewById(R.id.nav_home);
+        // Get user role from database
+        new Thread(() -> {
+            User currentUser = dbHelper.getUserById(currentUserId);
+            userRole = currentUser != null ? currentUser.getRole() : "student";
+            Log.d("MainActivity", "User role from database: " + userRole);
+            
+            // Update SharedPrefManager with role if not already set
+            User savedUser = SharedPrefManager.getInstance(MainActivity.this).getUser();
+            if (savedUser != null && (savedUser.getRole() == null || savedUser.getRole().isEmpty())) {
+                savedUser.setRole(userRole);
+                SharedPrefManager.getInstance(MainActivity.this).userLogin(savedUser);
+            }
+        }).start();
+
+        navPost = findViewById(R.id.nav_post);
         navStudy = findViewById(R.id.nav_study);
         navProfile = findViewById(R.id.nav_profile);
-        navView = findViewById(R.id.nav_view);
+        
+        rvSchedules = findViewById(R.id.rv_schedules);
+        tvEmptyState = findViewById(R.id.tv_empty_state);
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+        
+        // Setup SwipeRefreshLayout
+        swipeRefreshLayout.setOnRefreshListener(this::refreshSchedules);
+        swipeRefreshLayout.setColorSchemeResources(R.color.green_primary, R.color.purple_500, R.color.teal_700);
+        
         View headerView = navView.getHeaderView(0);
         ivProfilePicture = headerView.findViewById(R.id.ivProfilePicture);
         tvProfileName = headerView.findViewById(R.id.tvProfileName);
 
         loadUserProfile();
+        setupSchedulesRecyclerView();
         setupMenuButton();
+        setupNavigationViewMenu();
         setupBottomNavigation();
+        setupFloatingActionButton();
+        loadSchedules();
     }
 
     private void loadUserProfile() {
@@ -105,6 +153,87 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void setupSchedulesRecyclerView() {
+        rvSchedules.setLayoutManager(new LinearLayoutManager(this));
+        scheduleAdapter = new ScheduleAdapter(null, this);
+
+        // Set click listener for schedule items - opens edit activity
+        scheduleAdapter.setOnScheduleClickListener(schedule -> {
+            Intent intent = new Intent(MainActivity.this, ScheduleDetailActivity.class);
+            intent.putExtra("schedule_id", schedule.getId());
+            intent.putExtra("schedule_title", schedule.getTitle());
+            intent.putExtra("schedule_description", schedule.getDescription());
+            intent.putExtra("schedule_date", schedule.getScheduleDate());
+            intent.putExtra("schedule_start_time", schedule.getStartTime());
+            intent.putExtra("schedule_end_time", schedule.getEndTime());
+            intent.putExtra("schedule_type", schedule.getScheduleType());
+            intent.putExtra("user_id", currentUserId);
+            startActivityForResult(intent, 100);
+        });
+
+        // Set delete listener for schedule items
+        scheduleAdapter.setOnScheduleDeleteListener((schedule, position) -> {
+            // Show confirmation dialog
+            new androidx.appcompat.app.AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Delete Schedule")
+                    .setMessage("Are you sure you want to delete \"" + schedule.getTitle() + "\"?")
+                    .setPositiveButton("Delete", (dialog, which) -> {
+                        deleteSchedule(schedule.getId());
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        });
+
+        rvSchedules.setAdapter(scheduleAdapter);
+    }
+
+    private void refreshSchedules() {
+        new Thread(() -> {
+            List<Schedule> schedules = dbHelper.getSchedulesForUser(currentUserId);
+
+            runOnUiThread(() -> {
+                swipeRefreshLayout.setRefreshing(false);
+                if (schedules != null && !schedules.isEmpty()) {
+                    scheduleAdapter.updateList(schedules);
+                    rvSchedules.setVisibility(View.VISIBLE);
+                    tvEmptyState.setVisibility(View.GONE);
+                    Log.i("MainActivity", "Refreshed " + schedules.size() + " schedules");
+                } else {
+                    rvSchedules.setVisibility(View.GONE);
+                    tvEmptyState.setVisibility(View.VISIBLE);
+                    Log.i("MainActivity", "No schedules found for user " + currentUserId);
+                }
+            });
+        }).start();
+    }
+
+    private void loadSchedules() {
+        if (currentUserId == -1) {
+            tvEmptyState.setVisibility(View.VISIBLE);
+            rvSchedules.setVisibility(View.GONE);
+            return;
+        }
+
+        // Load schedules in background thread
+        new Thread(() -> {
+            List<Schedule> schedules = dbHelper.getSchedulesForUser(currentUserId);
+
+            runOnUiThread(() -> {
+                if (schedules != null && !schedules.isEmpty()) {
+                    scheduleAdapter.updateList(schedules);
+                    rvSchedules.setVisibility(View.VISIBLE);
+                    tvEmptyState.setVisibility(View.GONE);
+                    Log.i("MainActivity", "Loaded " + schedules.size() + " schedules");
+                } else {
+                    rvSchedules.setVisibility(View.GONE);
+                    tvEmptyState.setVisibility(View.VISIBLE);
+                    Log.i("MainActivity", "No schedules found for user " + currentUserId);
+                }
+                swipeRefreshLayout.setRefreshing(false);
+            });
+        }).start();
+    }
+
     private void setupMenuButton() {
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,8 +243,95 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void setupNavigationViewMenu() {
+        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(android.view.MenuItem item) {
+                int itemId = item.getItemId();
+
+                if (itemId == R.id.menu_home) {
+                    // Home button - stay in MainActivity
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.menu_posts) {
+                    Intent intent = new Intent(MainActivity.this, PostsActivity.class);
+                    startActivity(intent);
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.menu_study) {
+                    Intent intent;
+                    if (userRole != null) {
+                        if (userRole.equals("teacher") || userRole.equals("admin")) {
+                            intent = new Intent(MainActivity.this, GradeManagementActivity.class);
+                        } else {
+                            intent = new Intent(MainActivity.this, StudentGradesActivity.class);
+                        }
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(MainActivity.this, "Unknown user role", Toast.LENGTH_SHORT).show();
+                    }
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.menu_profile) {
+                    Toast.makeText(MainActivity.this, "Profile", Toast.LENGTH_SHORT).show();
+                    // TODO: Implement profile activity
+                } else if (itemId == R.id.menu_account) {
+                    Intent intent = new Intent(MainActivity.this, AccountMenuActivity.class);
+                    startActivity(intent);
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.menu_logout) {
+                    logout();
+                }
+
+                drawerLayout.closeDrawer(GravityCompat.END);
+                return true;
+            }
+        });
+    }
+
+    private void logout() {
+        SharedPrefManager.getInstance(this).logout();
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void setupFloatingActionButton() {
+        fabAddSchedule = findViewById(R.id.fab_add_schedule);
+        fabAddSchedule.setOnClickListener(v -> {
+            // Open ScheduleDetailActivity for creating new schedule
+            Intent intent = new Intent(MainActivity.this, ScheduleDetailActivity.class);
+            intent.putExtra("schedule_id", -1); // -1 means new schedule
+            intent.putExtra("user_id", currentUserId);
+            startActivityForResult(intent, 100);
+        });
+    }
+
+    private void deleteSchedule(int scheduleId) {
+        new Thread(() -> {
+            try {
+                dbHelper.deleteSchedule(scheduleId);
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivity.this, "Schedule deleted", Toast.LENGTH_SHORT).show();
+                    loadSchedules();
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivity.this, "Error deleting schedule: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            loadSchedules();
+        }
+    }
+
     private void setupBottomNavigation() {
-        navHome.setOnClickListener(new View.OnClickListener() {
+        navPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, PostsActivity.class);
@@ -127,30 +343,29 @@ public class MainActivity extends AppCompatActivity {
         navStudy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Màn hình học tập", Toast.LENGTH_SHORT).show();
+                Intent intent;
+                if (userRole != null) {
+                    if (userRole.equals("teacher") || userRole.equals("admin")) {
+                        intent = new Intent(MainActivity.this, GradeManagementActivity.class);
+                    } else {
+                        intent = new Intent(MainActivity.this, StudentGradesActivity.class);
+                    }
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(MainActivity.this, "Unknown user role", Toast.LENGTH_SHORT).show();
+                }
+                drawerLayout.closeDrawer(GravityCompat.END);
             }
         });
 
         navProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Màn hình hồ sơ", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, AccountMenuActivity.class);
+                startActivity(intent);
+                drawerLayout.closeDrawer(GravityCompat.END);
             }
         });
-        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                int itemId = item.getItemId();
 
-                if (itemId == R.id.nav_account) {
-                    Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-                    startActivity(intent);
-                    drawerLayout.closeDrawer(GravityCompat.END);
-                    return true;
-                }
-
-                return false;
-            }
-        });
     }
 }
