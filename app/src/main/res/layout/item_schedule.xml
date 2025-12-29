@@ -10,8 +10,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
         <TextView
             android:id="@+id/tv_schedule_title"
@@ -59,6 +65,18 @@
             android:textSize="12sp"
             android:textColor="#0066cc"
             android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btn_delete_schedule"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_delete"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="Delete schedule"
+            android:layout_gravity="top"
+            android:layout_marginStart="8dp" />
 
     </LinearLayout>
 

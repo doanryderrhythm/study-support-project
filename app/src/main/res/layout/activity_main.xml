@@ -55,11 +55,15 @@
 
             </LinearLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/content_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone" />
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_add_schedule"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="16dp"
+                android:src="@drawable/ic_add"
+                app:backgroundTint="#c587ff"
+                android:contentDescription="Add schedule" />
 
         </FrameLayout>
 
@@ -100,6 +104,8 @@
                 android:contentDescription="Account" />
 
         </LinearLayout>
+
+
 
     </LinearLayout>
 
