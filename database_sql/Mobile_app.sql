@@ -2,27 +2,37 @@
 USE Mobile_app;
 GO
 
-
-
 -- Bảng trường
 CREATE TABLE schools (
     id INT IDENTITY(1,1) PRIMARY KEY,
     school_name NVARCHAR(50) UNIQUE NOT NULL
 )
 
--- Bảng lớp
-CREATE TABLE classes (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    school_id INT NOT NULL,
-    class_name NVARCHAR(50) NOT NULL,
-    FOREIGN KEY (school_id) REFERENCES schools(id)
-)
-
 -- Bảng học kỳ
 CREATE TABLE semesters (
     id INT IDENTITY(1,1) PRIMARY KEY,
     semester_name NVARCHAR(50) NOT NULL
+);
+
+-- Bảng liên kết trường học với học kỳ
+CREATE TABLE school_semesters (
+    school_id INT NOT NULL,
+    semester_id INT NOT NULL,
+    PRIMARY KEY (school_id, semester_id),
+    FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
+    FOREIGN KEY (semester_id) REFERENCES semesters(id) ON DELETE CASCADE
 )
+
+-- Bảng môn học
+CREATE TABLE subjects (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    subject_name NVARCHAR(100) NOT NULL,
+    school_id INT NOT NULL,
+    description NVARCHAR(255),
+    FOREIGN KEY (school_id) REFERENCES schools(id)
+);
+
+
 
 -- Bảng vai trò
 CREATE TABLE roles (
@@ -32,6 +42,7 @@ CREATE TABLE roles (
     created_at DATETIME2 DEFAULT GETDATE()
 );
 
+-- Create users table first (before classes since classes references users)
 CREATE TABLE users (
     id INT IDENTITY(1,1) PRIMARY KEY,
     username NVARCHAR(50) UNIQUE NOT NULL,
@@ -39,7 +50,6 @@ CREATE TABLE users (
     email NVARCHAR(100),
     full_name NVARCHAR(100),
     date_of_birth DATE,
-    class_id INT NOT NULL,
     role_id INT NOT NULL,
     phone NVARCHAR(20),
     address NVARCHAR(255),
@@ -47,8 +57,41 @@ CREATE TABLE users (
     is_active BIT DEFAULT 1,
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE(),
-    FOREIGN KEY (class_id) REFERENCES classes(id),
     FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+
+-- Bảng lớp
+CREATE TABLE classes (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    school_id INT NOT NULL,
+    semester_id INT NOT NULL,
+    class_name NVARCHAR(50) NOT NULL,
+    FOREIGN KEY (school_id) REFERENCES schools(id),
+    FOREIGN KEY (semester_id) REFERENCES semesters(id)
+);
+
+CREATE TABLE class_teachers (
+    class_id INT NOT NULL,
+    teacher_id INT NOT NULL,
+    PRIMARY KEY (class_id, teacher_id),
+    FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
+    FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE class_students (
+    class_id INT NOT NULL,
+    student_id INT NOT NULL,
+    PRIMARY KEY (class_id, student_id),
+    FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE class_subjects (
+    class_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    PRIMARY KEY (class_id, subject_id),
+    FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
 );
 
 -- Bảng phân quyền user
@@ -110,19 +153,13 @@ CREATE TABLE grades (
     id INT IDENTITY(1,1) PRIMARY KEY,
     student_id INT NOT NULL,
     class_id INT NOT NULL,
-    subject_name NVARCHAR(100) NOT NULL,
     grade_value DECIMAL(5,2) NOT NULL,
     grade_type NVARCHAR(50) DEFAULT N'midterm', 
-    semester_id INT NOT NULL,
-    school_year NVARCHAR(20),
-    teacher_id INT,
     notes NTEXT,
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE(),
     FOREIGN KEY (student_id) REFERENCES users(id),
-    FOREIGN KEY (teacher_id) REFERENCES users(id),
-    FOREIGN KEY (class_id) REFERENCES classes(id),
-    FOREIGN KEY (semester_id) REFERENCES semesters(id)
+    FOREIGN KEY (class_id) REFERENCES classes(id)
 );
 
 -- Bảng lịch cá nhân 
@@ -136,7 +173,7 @@ CREATE TABLE personal_schedules (
     end_time TIME,
     schedule_type NVARCHAR(50) DEFAULT N'personal', 
     created_at DATETIME2 DEFAULT GETDATE(),
-    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- Bảng cài đặt mạng xã hội 
@@ -174,84 +211,8 @@ CREATE TABLE password_resets (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Thêm các vai trò
-INSERT INTO roles (role_name, description) VALUES
-(N'admin', N'Quản trị hệ thống - Toàn quyền'),
-(N'teacher', N'Giáo viên - Quản lý lớp học và điểm số'),
-(N'student', N'Học sinh - Xem điểm và bài viết');
 
--- Thêm các quyền chi tiết theo ảnh
-INSERT INTO permissions (permission_name, description) VALUES
-
--- Quản lý người dùng & đăng nhập
-(N'user_management', N'Quản lý người dùng'),
-(N'login', N'Đăng nhập hệ thống'),
-(N'register', N'Đăng ký tài khoản'),
-
--- Quản lý bài viết
-(N'view_posts', N'Xem bài viết'),
-(N'create_posts', N'Đăng bài viết'),
-(N'edit_posts', N'Sửa bài viết'),
-(N'delete_posts', N'Xóa bài viết'),
-(N'publish_posts', N'Xuất bản bài viết'),
-
--- Quản lý điểm
-(N'view_grades', N'Xem điểm'),
-(N'manage_grades', N'Quản lý điểm'),
-(N'export_grades', N'Xuất bảng điểm'),
-
--- Lịch và lịch trình
-(N'view_schedule', N'Xem lịch'),
-(N'manage_schedule', N'Quản lý lịch'),
-(N'view_personal_calendar', N'Xem lịch cá nhân'),
-
--- Cài đặt
-(N'system_settings', N'Cài đặt hệ thống'),
-(N'social_settings', N'Cài đặt mạng xã hội'),
-(N'privacy_settings', N'Cài đặt bảo mật'),
-
--- Bảo mật
-(N'password_reset', N'Đặt lại mật khẩu'),
-(N'account_security', N'Bảo mật tài khoản'),
-(N'view_login_history', N'Xem lịch sử đăng nhập');
-
--- Gán quyền cho admin
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM roles r, permissions p 
-WHERE r.role_name = N'admin';
-
--- Gán quyền cho teacher
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM roles r, permissions p 
-WHERE r.role_name = N'teacher'
-AND p.permission_name IN (N'view_posts', N'create_posts', N'edit_posts', N'publish_posts', 
-                         N'view_grades', N'manage_grades', N'export_grades',
-                         N'view_schedule', N'manage_schedule');
-
--- Gán quyền cho student
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM roles r, permissions p 
-WHERE r.role_name = N'student'
-AND p.permission_name IN (N'view_posts', N'view_grades', N'view_schedule', 
-                         N'view_personal_calendar', N'password_reset', N'account_security');
-
--- Tạo trường
-INSERT INTO schools (school_name)
-VALUES (N'Trường Đại học UIT')
-
--- Tạo lớp
-INSERT INTO classes (class_name, school_id)
-VALUES (N'SE114', '1')
-
--- Tạo tài khoản admin
-INSERT INTO users (username, password, email, full_name, class_id, role_id) 
-VALUES (N'Danh', N'danh123', N'danh123@school.edu.vn', N'Quản Trị Viên', '1', '1');
-
--- Gán quyền admin
-INSERT INTO user_roles (user_id, role_id, granted_by) 
-VALUES (1, 1, 1);
 GO
-
 -- Stored Procedure đăng bài viết
 CREATE PROCEDURE CreatePost
     @title NVARCHAR(255),
@@ -311,47 +272,54 @@ BEGIN
 END;
 GO
 
--- Stored Procedure nhập điểm
+-- Stored Procedure nhập điểm (updated to match new schema without subject_name and school_year)
 CREATE PROCEDURE AddGrade
     @student_id INT,
     @class_id INT,
-    @subject_name NVARCHAR(100),
     @grade_value DECIMAL(5,2),
     @grade_type NVARCHAR(50),
-    @semester_id INT,
-    @school_year NVARCHAR(20),
-    @teacher_id INT
+    @notes NTEXT = NULL
 AS
 BEGIN
-    INSERT INTO grades (student_id, class_id, subject_name, grade_value, grade_type, semester_id, school_year, teacher_id)
-    VALUES (@student_id, @class_id, @subject_name, @grade_value, @grade_type, @semester_id, @school_year, @teacher_id);
+    -- Validate student is enrolled in class
+    IF NOT EXISTS (SELECT 1 FROM class_students WHERE class_id = @class_id AND student_id = @student_id)
+    BEGIN
+        SELECT -1 as grade_id; -- Error: student not in class
+        RETURN;
+    END
+    
+    INSERT INTO grades (student_id, class_id, grade_value, grade_type, notes)
+    VALUES (@student_id, @class_id, @grade_value, @grade_type, @notes);
     
     SELECT SCOPE_IDENTITY() as grade_id;
 END;
 GO
 
--- Stored Procedure xem bảng điểm học sinh
+-- Stored Procedure xem bảng điểm học sinh (updated to match new schema)
 CREATE PROCEDURE GetStudentGrades
     @student_id INT,
-    @semester_id INT = NULL,
-    @school_year NVARCHAR(20) = NULL
+    @semester_id INT = NULL
 AS
 BEGIN
     SELECT 
-        g.subject_name,
+        g.id,
         g.class_id,
         g.grade_value,
         g.grade_type,
-        g.semester_id,
-        g.school_year,
+        g.notes,
+        c.semester_id,
+        c.class_name,
+        c.school_id,
         g.created_at,
-        t.full_name as teacher_name
+        g.updated_at,
+        u.full_name as teacher_name
     FROM grades g
-    LEFT JOIN users t ON g.teacher_id = t.id
+    INNER JOIN classes c ON g.class_id = c.id
+    LEFT JOIN class_teachers ct ON c.id = ct.class_id
+    LEFT JOIN users u ON ct.teacher_id = u.id
     WHERE g.student_id = @student_id
-    AND (@semester_id IS NULL OR g.semester_id = @semester_id)
-    AND (@school_year IS NULL OR g.school_year = @school_year)
-    ORDER BY g.subject_name, g.grade_type;
+    AND (@semester_id IS NULL OR c.semester_id = @semester_id)
+    ORDER BY c.class_name, g.grade_type;
 END;
 GO
 
