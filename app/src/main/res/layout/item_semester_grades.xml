@@ -30,13 +30,19 @@
                 android:padding="8dp"
                 android:layout_marginBottom="12dp" />
 
-            <TableLayout
-                android:id="@+id/grades_table"
+            <HorizontalScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:stretchColumns="0,1,2">
+                android:layout_height="wrap_content">
 
-            </TableLayout>
+                <TableLayout
+                    android:id="@+id/grades_table"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:stretchColumns="0,1,2,3,4">
+
+                </TableLayout>
+
+            </HorizontalScrollView>
 
         </LinearLayout>
 

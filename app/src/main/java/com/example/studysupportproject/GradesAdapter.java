@@ -14,11 +14,11 @@ import java.util.Map;
 
 public class GradesAdapter extends RecyclerView.Adapter<GradesAdapter.SemesterViewHolder> {
     private List<String> semesters;
-    private Map<String, List<Grade>> gradesBySemester;
+    private Map<String, Map<String, List<Grade>>> gradesBySemesterAndClass;
 
-    public GradesAdapter(List<String> semesters, Map<String, List<Grade>> gradesBySemester) {
+    public GradesAdapter(List<String> semesters, Map<String, Map<String, List<Grade>>> gradesBySemesterAndClass) {
         this.semesters = semesters;
-        this.gradesBySemester = gradesBySemester;
+        this.gradesBySemesterAndClass = gradesBySemesterAndClass;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class GradesAdapter extends RecyclerView.Adapter<GradesAdapter.SemesterVi
     @Override
     public void onBindViewHolder(SemesterViewHolder holder, int position) {
         String semester = semesters.get(position);
-        List<Grade> grades = gradesBySemester.get(semester);
+        Map<String, List<Grade>> classesInSemester = gradesBySemesterAndClass.get(semester);
 
         holder.semesterTitle.setText(semester);
         holder.gradesTable.removeAllViews();
@@ -40,35 +40,49 @@ public class GradesAdapter extends RecyclerView.Adapter<GradesAdapter.SemesterVi
         TableRow headerRow = new TableRow(holder.gradesTable.getContext());
         headerRow.setBackgroundColor(0xFFE8F5E9); // Light green background
 
-        String[] headers = {"Subject", "Grade", "Type"};
+        String[] headers = {"Subject", "Quá trình", "Giữa kỳ", "Cuối kỳ", "Thực hành"};
         for (String header : headers) {
             TextView headerCell = createTableCell(holder.gradesTable.getContext(), header, true);
             headerRow.addView(headerCell);
         }
         holder.gradesTable.addView(headerRow);
 
-        // Add grade rows
-        if (grades != null) {
-            for (Grade grade : grades) {
+        // Add class/subject rows
+        if (classesInSemester != null) {
+            int rowIndex = 0;
+            for (String className : classesInSemester.keySet()) {
+                List<Grade> gradesForClass = classesInSemester.get(className);
+                
+                // Create a map of grade types for this class
+                Map<String, Double> gradeTypeMap = new java.util.HashMap<>();
+                for (Grade grade : gradesForClass) {
+                    gradeTypeMap.put(grade.getGradeType().toLowerCase(), grade.getGradeValue());
+                }
+
                 TableRow row = new TableRow(holder.gradesTable.getContext());
 
                 // Alternate row colors
-                if (holder.gradesTable.getChildCount() % 2 == 0) {
+                if (rowIndex % 2 == 0) {
                     row.setBackgroundColor(0xFFFAFAFA);
                 }
 
+                // Subject/Class name cell
                 TextView subjectCell = createTableCell(holder.gradesTable.getContext(),
-                        grade.getSubjectName(), false);
-                TextView gradeCell = createTableCell(holder.gradesTable.getContext(),
-                        String.format("%.2f", grade.getGradeValue()), false);
-                TextView typeCell = createTableCell(holder.gradesTable.getContext(),
-                        grade.getGradeType(), false);
-
+                        className, false);
                 row.addView(subjectCell);
-                row.addView(gradeCell);
-                row.addView(typeCell);
+
+                // Grade type cells in order: quá trình, giữa kỳ, cuối kỳ, thực hành
+                String[] gradeTypes = {"quá trình", "giữa kỳ", "cuối kỳ", "thực hành"};
+                for (String gradeType : gradeTypes) {
+                    Double gradeValue = gradeTypeMap.get(gradeType.toLowerCase());
+                    String gradeText = gradeValue != null ? String.format("%.2f", gradeValue) : "-";
+                    TextView gradeCell = createTableCell(holder.gradesTable.getContext(),
+                            gradeText, false);
+                    row.addView(gradeCell);
+                }
 
                 holder.gradesTable.addView(row);
+                rowIndex++;
             }
         }
     }
@@ -81,16 +95,16 @@ public class GradesAdapter extends RecyclerView.Adapter<GradesAdapter.SemesterVi
     private TextView createTableCell(android.content.Context context, String text, boolean isHeader) {
         TextView cell = new TextView(context);
         cell.setText(text);
-        cell.setPadding(16, 12, 16, 12);
+        cell.setPadding(12, 10, 12, 10);
         cell.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1f));
 
         if (isHeader) {
             cell.setTextColor(0xFF1B5E20); // Dark green
-            cell.setTextSize(14);
+            cell.setTextSize(12);
             cell.setTypeface(null, android.graphics.Typeface.BOLD);
         } else {
             cell.setTextColor(0xFF424242);
-            cell.setTextSize(13);
+            cell.setTextSize(12);
         }
 
         return cell;
