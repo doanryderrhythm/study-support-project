@@ -163,7 +163,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 if (scheduleId != -1) {
                     // Update existing schedule
                     boolean success = dbHelper.updateSchedule(scheduleId, title, description,
-                            date, startTime, endTime);
+                            date, startTime, endTime, type);
                     runOnUiThread(() -> {
                         if (success) {
                             Toast.makeText(ScheduleDetailActivity.this, "Schedule updated successfully",
