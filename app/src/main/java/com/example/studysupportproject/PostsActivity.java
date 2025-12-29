@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +32,7 @@ public class PostsActivity extends AppCompatActivity {
     private RecyclerView rvPosts;
     private LinearLayout llEmptyState;
     private FloatingActionButton fabMain;
+    private ImageButton btnBack;
     private LinearLayout fabMenuItems, fabCreatePost, fabViewProfile;
     private boolean isFabMenuOpen = false;
     private Animation fabRotateClockwise, fabRotateCounterClockwise;
@@ -46,6 +49,14 @@ public class PostsActivity extends AppCompatActivity {
 
         rvPosts = findViewById(R.id.rvPosts);
         llEmptyState = findViewById(R.id.llEmptyState);
+
+        btnBack = findViewById(R.id.btnBackPosts);
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         setupFabMenu();
         setupRecyclerView();
