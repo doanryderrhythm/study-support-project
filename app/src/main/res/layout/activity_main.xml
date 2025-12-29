@@ -5,45 +5,63 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:fitsSystemWindows="true">
+
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <include layout="@layout/tool_bar"/>
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:elevation="4dp">
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
             <LinearLayout
+                android:id="@+id/schedules_container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center_vertical|end"
-                android:paddingEnd="16dp">
+                android:orientation="vertical">
 
-                <ImageButton
-                    android:id="@+id/menu_button"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@drawable/ic_menu"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Open menu"
-                    android:scaleType="centerInside" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="My Schedules"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:padding="16dp"
+                    android:background="#F9F9F9" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_schedules"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:padding="8dp" />
+
+                <TextView
+                    android:id="@+id/tv_empty_state"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="No schedules yet"
+                    android:textSize="16sp"
+                    android:textColor="#999999"
+                    android:visibility="gone" />
 
             </LinearLayout>
 
-        </androidx.appcompat.widget.Toolbar>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/content_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
 
-        <FrameLayout
-            android:id="@+id/content_frame"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -53,13 +71,15 @@
             android:elevation="8dp">
 
             <ImageButton
-                android:id="@+id/nav_home"
+                android:id="@+id/nav_post"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@drawable/ic_home"
+                android:src="@drawable/ic_notifications"
                 android:background="?attr/selectableItemBackground"
-                android:contentDescription="Home" />
+                android:contentDescription="Posts" />
+
+
 
             <ImageButton
                 android:id="@+id/nav_study"
@@ -75,9 +95,9 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@drawable/ic_profile"
+                android:src="@drawable/ic_account"
                 android:background="?attr/selectableItemBackground"
-                android:contentDescription="Profile" />
+                android:contentDescription="Account" />
 
         </LinearLayout>
 
