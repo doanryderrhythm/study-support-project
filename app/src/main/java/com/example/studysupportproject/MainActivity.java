@@ -1,6 +1,7 @@
 package com.example.studysupportproject;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
@@ -12,10 +13,12 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rvSchedules;
     private TextView tvEmptyState;
     private ScheduleAdapter scheduleAdapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     private DatabaseHelper dbHelper;
     private int currentUserId;
@@ -63,6 +67,16 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        // Toolbar and navigation
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("My Schedules");
+        }
+        drawerLayout = findViewById(R.id.drawer_layout);
+        menuButton = findViewById(R.id.menu_button);
+        navView = findViewById(R.id.nav_view);
+
         currentUserId = getSharedPreferences("UserPrefs", MODE_PRIVATE)
                 .getInt("user_id", -1);
 
@@ -80,15 +94,17 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
 
-        drawerLayout = findViewById(R.id.drawer_layout);
-        menuButton = findViewById(R.id.menu_button);
         navPost = findViewById(R.id.nav_post);
         navStudy = findViewById(R.id.nav_study);
         navProfile = findViewById(R.id.nav_profile);
-        navView = findViewById(R.id.nav_view);
         
         rvSchedules = findViewById(R.id.rv_schedules);
         tvEmptyState = findViewById(R.id.tv_empty_state);
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+        
+        // Setup SwipeRefreshLayout
+        swipeRefreshLayout.setOnRefreshListener(this::refreshSchedules);
+        swipeRefreshLayout.setColorSchemeResources(R.color.green_primary, R.color.purple_500, R.color.teal_700);
         
         View headerView = navView.getHeaderView(0);
         ivProfilePicture = headerView.findViewById(R.id.ivProfilePicture);
@@ -171,6 +187,26 @@ public class MainActivity extends AppCompatActivity {
         rvSchedules.setAdapter(scheduleAdapter);
     }
 
+    private void refreshSchedules() {
+        new Thread(() -> {
+            List<Schedule> schedules = dbHelper.getSchedulesForUser(currentUserId);
+
+            runOnUiThread(() -> {
+                swipeRefreshLayout.setRefreshing(false);
+                if (schedules != null && !schedules.isEmpty()) {
+                    scheduleAdapter.updateList(schedules);
+                    rvSchedules.setVisibility(View.VISIBLE);
+                    tvEmptyState.setVisibility(View.GONE);
+                    Log.i("MainActivity", "Refreshed " + schedules.size() + " schedules");
+                } else {
+                    rvSchedules.setVisibility(View.GONE);
+                    tvEmptyState.setVisibility(View.VISIBLE);
+                    Log.i("MainActivity", "No schedules found for user " + currentUserId);
+                }
+            });
+        }).start();
+    }
+
     private void loadSchedules() {
         if (currentUserId == -1) {
             tvEmptyState.setVisibility(View.VISIBLE);
@@ -193,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
                     tvEmptyState.setVisibility(View.VISIBLE);
                     Log.i("MainActivity", "No schedules found for user " + currentUserId);
                 }
+                swipeRefreshLayout.setRefreshing(false);
             });
         }).start();
     }
@@ -235,11 +272,11 @@ public class MainActivity extends AppCompatActivity {
                 } else if (itemId == R.id.menu_profile) {
                     Toast.makeText(MainActivity.this, "Profile", Toast.LENGTH_SHORT).show();
                     // TODO: Implement profile activity
-                } else if (itemId == R.id.nav_account) {
+                } else if (itemId == R.id.menu_account) {
                     Intent intent = new Intent(MainActivity.this, AccountMenuActivity.class);
                     startActivity(intent);
                     drawerLayout.closeDrawer(GravityCompat.END);
-                } else if (itemId == R.id.nav_logout) {
+                } else if (itemId == R.id.menu_logout) {
                     logout();
                 }
 
@@ -251,8 +288,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void logout() {
         SharedPrefManager.getInstance(this).logout();
-        
-        
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

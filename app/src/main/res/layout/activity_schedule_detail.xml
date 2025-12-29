@@ -3,9 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:fitsSystemWindows="true">
 
-    <include layout="@layout/tool_bar" />
+    <include layout="@layout/tool_bar"/>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -142,7 +143,7 @@
             android:layout_width="120dp"
             android:layout_height="48dp"
             android:text="Cancel"
-            android:background="@color/light_gray"
+            android:backgroundTint="@color/light_gray"
             android:textColor="#333333"
             android:layout_marginEnd="8dp" />
 
@@ -151,7 +152,7 @@
             android:layout_width="120dp"
             android:layout_height="48dp"
             android:text="Save"
-            android:background="@color/green_primary"
+            android:backgroundTint="@color/green_primary"
             android:textColor="@color/white" />
 
     </LinearLayout>

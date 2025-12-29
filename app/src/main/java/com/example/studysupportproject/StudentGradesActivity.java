@@ -46,8 +46,10 @@ public class StudentGradesActivity extends AppCompatActivity {
         // Toolbar and navigation
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null)
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("My Grades");
+        }
         drawerLayout = findViewById(R.id.drawer_layout);
         menuButton = findViewById(R.id.menu_button);
         navView = findViewById(R.id.nav_view);
@@ -162,8 +164,14 @@ public class StudentGradesActivity extends AppCompatActivity {
                 } else if (itemId == R.id.menu_study) {
                     //Study button - stay in StudentGradesActivity
                     drawerLayout.closeDrawer(GravityCompat.END);
-                } else if (itemId == R.id.nav_account) {
+                } else if (itemId == R.id.menu_account) {
                     Intent intent = new Intent(StudentGradesActivity.this, AccountMenuActivity.class);
+                    startActivity(intent);
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.menu_logout) {
+                    SharedPrefManager.getInstance(StudentGradesActivity.this).logout();
+                    Intent intent = new Intent(StudentGradesActivity.this, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     drawerLayout.closeDrawer(GravityCompat.END);
                 }
@@ -175,7 +183,7 @@ public class StudentGradesActivity extends AppCompatActivity {
     }
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 }

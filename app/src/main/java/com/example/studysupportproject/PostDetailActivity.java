@@ -36,6 +36,7 @@ public class PostDetailActivity extends AppCompatActivity {
     private int postId;
     private int postAuthorId;
     private int currentUserId;
+    private String userRole;
     
     private DrawerLayout drawerLayout;
     private ImageButton menuButton;
@@ -245,14 +246,31 @@ public class PostDetailActivity extends AppCompatActivity {
                     startActivity(intent);
                     drawerLayout.closeDrawer(GravityCompat.END);
                 } else if (itemId == R.id.menu_posts) {
-                    // Posts button - stay in PostDetailActivity
+                    getOnBackPressedDispatcher().onBackPressed();
                     drawerLayout.closeDrawer(GravityCompat.END);
                 } else if (itemId == R.id.menu_study) {
-                    Intent intent = new Intent(PostDetailActivity.this, StudentGradesActivity.class);
+                    Intent intent;
+                    User savedUser = SharedPrefManager.getInstance(PostDetailActivity.this).getUser();
+                    userRole = savedUser != null ? savedUser.getRole() : "student";
+                    if (userRole != null) {
+                        if (userRole.equals("teacher") || userRole.equals("admin")) {
+                            intent = new Intent(PostDetailActivity.this, GradeManagementActivity.class);
+                        } else {
+                            intent = new Intent(PostDetailActivity.this, StudentGradesActivity.class);
+                        }
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(PostDetailActivity.this, "Unknown user role", Toast.LENGTH_SHORT).show();
+                    }
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.menu_account) {
+                    Intent intent = new Intent(PostDetailActivity.this, AccountMenuActivity.class);
                     startActivity(intent);
                     drawerLayout.closeDrawer(GravityCompat.END);
-                } else if (itemId == R.id.nav_account) {
-                    Intent intent = new Intent(PostDetailActivity.this, AccountMenuActivity.class);
+                } else if (itemId == R.id.menu_logout) {
+                    SharedPrefManager.getInstance(PostDetailActivity.this).logout();
+                    Intent intent = new Intent(PostDetailActivity.this, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     drawerLayout.closeDrawer(GravityCompat.END);
                 }
@@ -265,7 +283,7 @@ public class PostDetailActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 }

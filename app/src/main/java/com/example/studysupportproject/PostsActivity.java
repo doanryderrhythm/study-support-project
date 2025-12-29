@@ -46,6 +46,7 @@ public class PostsActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private ImageButton menuButton;
     private NavigationView navView;
+    private String userRole;
     private ImageButton navHome, navStudy, navProfile;
 
 
@@ -62,8 +63,10 @@ public class PostsActivity extends AppCompatActivity {
         // Toolbar and navigation
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null)
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Community Posts");
+        }
         drawerLayout = findViewById(R.id.drawer_layout);
         menuButton = findViewById(R.id.menu_button);
         navView = findViewById(R.id.nav_view);
@@ -186,11 +189,28 @@ public class PostsActivity extends AppCompatActivity {
                     // Posts button - stay in PostsActivity
                     drawerLayout.closeDrawer(GravityCompat.END);
                 } else if (itemId == R.id.menu_study) {
-                    Intent intent = new Intent(PostsActivity.this, StudentGradesActivity.class);
+                    Intent intent;
+                    User savedUser = SharedPrefManager.getInstance(PostsActivity.this).getUser();
+                    userRole = savedUser != null ? savedUser.getRole() : "student";
+                    if (userRole != null) {
+                        if (userRole.equals("teacher") || userRole.equals("admin")) {
+                            intent = new Intent(PostsActivity.this, GradeManagementActivity.class);
+                        } else {
+                            intent = new Intent(PostsActivity.this, StudentGradesActivity.class);
+                        }
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(PostsActivity.this, "Unknown user role", Toast.LENGTH_SHORT).show();
+                    }
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.menu_account) {
+                    Intent intent = new Intent(PostsActivity.this, AccountMenuActivity.class);
                     startActivity(intent);
                     drawerLayout.closeDrawer(GravityCompat.END);
-                } else if (itemId == R.id.nav_account) {
-                    Intent intent = new Intent(PostsActivity.this, AccountMenuActivity.class);
+                } else if (itemId == R.id.menu_logout) {
+                    SharedPrefManager.getInstance(PostsActivity.this).logout();
+                    Intent intent = new Intent(PostsActivity.this, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     drawerLayout.closeDrawer(GravityCompat.END);
                 }
@@ -203,7 +223,7 @@ public class PostsActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 }
