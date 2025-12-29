@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                 int itemId = item.getItemId();
 
                 if (itemId == R.id.nav_account) {
-                    Intent intent = new Intent(MainActivity.this, AccountMenuActivity.class);
+                    Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                     startActivity(intent);
                     drawerLayout.closeDrawer(GravityCompat.END);
                     return true;
