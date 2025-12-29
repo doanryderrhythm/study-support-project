@@ -882,7 +882,7 @@ public class DatabaseHelper {
      * Cập nhật lịch
      */
     public boolean updateSchedule(int scheduleId, String title, String description,
-                                 String scheduleDate, String startTime, String endTime) {
+                                 String scheduleDate, String startTime, String endTime, String scheduleType) {
         Connection con = null;
         PreparedStatement stmt = null;
         boolean success = false;
@@ -892,7 +892,7 @@ public class DatabaseHelper {
             if (con == null) return false;
 
             String query = "UPDATE personal_schedules SET title = ?, description = ?, " +
-                    "schedule_date = ?, start_time = ?, end_time = ? WHERE id = ?";
+                    "schedule_date = ?, start_time = ?, end_time = ?, schedule_type = ? WHERE id = ?";
 
             stmt = con.prepareStatement(query);
             stmt.setString(1, title);
@@ -900,7 +900,8 @@ public class DatabaseHelper {
             stmt.setString(3, scheduleDate);
             stmt.setString(4, startTime);
             stmt.setString(5, endTime);
-            stmt.setInt(6, scheduleId);
+            stmt.setString(6, scheduleType != null ? scheduleType : "personal");
+            stmt.setInt(7, scheduleId);
 
             int rowsAffected = stmt.executeUpdate();
             success = rowsAffected > 0;
