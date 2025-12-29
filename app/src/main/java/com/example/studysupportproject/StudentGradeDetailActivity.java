@@ -1,5 +1,7 @@
 package com.example.studysupportproject;
 
+import static android.view.View.GONE;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -74,6 +76,9 @@ public class StudentGradeDetailActivity extends AppCompatActivity {
         menuButton = findViewById(R.id.menu_button);
         navView = findViewById(R.id.nav_view);
         submitButton = findViewById(R.id.submit_button);
+
+        //Disable drawer button
+        menuButton.setVisibility(GONE);
         
         if (drawerLayout == null || menuButton == null || navView == null || submitButton == null) {
             Toast.makeText(this, "Error: Drawer views not found", Toast.LENGTH_SHORT).show();
@@ -141,11 +146,16 @@ public class StudentGradeDetailActivity extends AppCompatActivity {
                 Intent intent = new Intent(StudentGradeDetailActivity.this, PostsActivity.class);
                 startActivity(intent);
             } else if (itemId == R.id.menu_study) {
-                Intent intent = new Intent(StudentGradeDetailActivity.this, GradeManagementActivity.class);
-                startActivity(intent);
-            } else if (itemId == R.id.nav_account) {
+                getOnBackPressedDispatcher().onBackPressed();
+            } else if (itemId == R.id.menu_account) {
                 Intent intent = new Intent(StudentGradeDetailActivity.this, AccountMenuActivity.class);
                 startActivity(intent);
+            } else if (itemId == R.id.menu_logout) {
+                SharedPrefManager.getInstance(StudentGradeDetailActivity.this).logout();
+                Intent intent = new Intent(StudentGradeDetailActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
             }
 
             drawerLayout.closeDrawer(GravityCompat.END);
@@ -275,7 +285,7 @@ public class StudentGradeDetailActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 }

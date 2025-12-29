@@ -104,7 +104,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/ic_facebook"
-                        android:tint="#1877F2"
+                        app:tint="#1877F2"
                         android:contentDescription="Facebook" />
 
                     <LinearLayout
@@ -152,7 +152,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/ic_twitter"
-                        android:tint="#1DA1F2"
+                        app:tint="#1DA1F2"
                         android:contentDescription="Twitter" />
 
                     <LinearLayout
@@ -200,7 +200,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/ic_google"
-                        android:tint="#4285F4"
+                        app:tint="#4285F4"
                         android:contentDescription="Google" />
 
                     <LinearLayout
@@ -247,7 +247,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/ic_linkedin"
-                        android:tint="#0A66C2"
+                        app:tint="#0A66C2"
                         android:contentDescription="LinkedIn" />
 
                     <LinearLayout

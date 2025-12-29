@@ -22,4 +22,12 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
     </style>
+
+    <!-- Toolbar Style -->
+    <style name="ToolbarStyle">
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="actionMenuTextColor">@android:color/white</item>
+        <item name="titleEnabled">true</item>
+    </style>
 </resources>

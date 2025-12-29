@@ -79,11 +79,16 @@ public class StudentGradesEditActivity extends AppCompatActivity {
                 Intent intent = new Intent(StudentGradesEditActivity.this, PostsActivity.class);
                 startActivity(intent);
             } else if (itemId == R.id.menu_study) {
-                Intent intent = new Intent(StudentGradesEditActivity.this, GradeManagementActivity.class);
-                startActivity(intent);
-            } else if (itemId == R.id.nav_account) {
+                getOnBackPressedDispatcher().onBackPressed();
+            } else if (itemId == R.id.menu_account) {
                 Intent intent = new Intent(StudentGradesEditActivity.this, AccountMenuActivity.class);
                 startActivity(intent);
+            } else if (itemId == R.id.menu_logout) {
+                SharedPrefManager.getInstance(StudentGradesEditActivity.this).logout();
+                Intent intent = new Intent(StudentGradesEditActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
             }
 
             drawerLayout.closeDrawer(GravityCompat.END);
@@ -139,7 +144,7 @@ public class StudentGradesEditActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 }

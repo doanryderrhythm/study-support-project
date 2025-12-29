@@ -1,16 +1,22 @@
 package com.example.studysupportproject;
 
+import static android.view.View.GONE;
+
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -26,6 +32,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     private Spinner spType;
     private Button btnSave;
     private Button btnCancel;
+    private ImageButton menuButton;
 
     private DatabaseHelper dbHelper;
     private int scheduleId = -1;
@@ -41,6 +48,8 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+        menuButton = findViewById(R.id.menu_button);
+        menuButton.setVisibility(GONE);
 
         dbHelper = new DatabaseHelper();
         initializeViews();
@@ -203,7 +212,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 

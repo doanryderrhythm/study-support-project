@@ -35,8 +35,10 @@ public class GradeManagementActivity extends AppCompatActivity {
         // Setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null)
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Grade Management");
+        }
 
         // Setup drawer
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -70,9 +72,15 @@ public class GradeManagementActivity extends AppCompatActivity {
                 startActivity(intent);
             } else if (itemId == R.id.menu_study) {
                 // Stay in grade management
-            } else if (itemId == R.id.nav_account) {
+            } else if (itemId == R.id.menu_account) {
                 Intent intent = new Intent(GradeManagementActivity.this, AccountMenuActivity.class);
                 startActivity(intent);
+            } else if (itemId == R.id.menu_logout) {
+                SharedPrefManager.getInstance(GradeManagementActivity.this).logout();
+                Intent intent = new Intent(GradeManagementActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
             }
 
             drawerLayout.closeDrawer(GravityCompat.END);
@@ -134,7 +142,7 @@ public class GradeManagementActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 }
