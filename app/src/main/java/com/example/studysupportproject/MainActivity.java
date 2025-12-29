@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
     private int currentUserId;
+    private String userRole;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +63,20 @@ public class MainActivity extends AppCompatActivity {
 
         currentUserId = getSharedPreferences("UserPrefs", MODE_PRIVATE)
                 .getInt("user_id", -1);
+
+        // Get user role from database
+        new Thread(() -> {
+            User currentUser = dbHelper.getUserById(currentUserId);
+            userRole = currentUser != null ? currentUser.getRole() : "student";
+            Log.d("MainActivity", "User role from database: " + userRole);
+            
+            // Update SharedPrefManager with role if not already set
+            User savedUser = SharedPrefManager.getInstance(MainActivity.this).getUser();
+            if (savedUser != null && (savedUser.getRole() == null || savedUser.getRole().isEmpty())) {
+                savedUser.setRole(userRole);
+                SharedPrefManager.getInstance(MainActivity.this).userLogin(savedUser);
+            }
+        }).start();
 
         drawerLayout = findViewById(R.id.drawer_layout);
         menuButton = findViewById(R.id.menu_button);
@@ -183,8 +198,17 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                     drawerLayout.closeDrawer(GravityCompat.END);
                 } else if (itemId == R.id.menu_study) {
-                    Intent intent = new Intent(MainActivity.this, StudentGradesActivity.class);
-                    startActivity(intent);
+                    Intent intent;
+                    if (userRole != null) {
+                        if (userRole.equals("teacher") || userRole.equals("admin")) {
+                            intent = new Intent(MainActivity.this, GradeManagementActivity.class);
+                        } else {
+                            intent = new Intent(MainActivity.this, StudentGradesActivity.class);
+                        }
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(MainActivity.this, "Unknown user role", Toast.LENGTH_SHORT).show();
+                    }
                     drawerLayout.closeDrawer(GravityCompat.END);
                 } else if (itemId == R.id.menu_profile) {
                     Toast.makeText(MainActivity.this, "Profile", Toast.LENGTH_SHORT).show();

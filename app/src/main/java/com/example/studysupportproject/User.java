@@ -9,6 +9,7 @@ public class User {
     private String avatar;
     private String phone;
     private String createdAt;
+    private String role;
 
     // Constructors
     public User() {
@@ -82,6 +83,14 @@ public class User {
         this.createdAt = createdAt;
     }
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -90,6 +99,7 @@ public class User {
                 ", email='" + email + '\'' +
                 ", fullName='" + fullName + '\'' +
                 ", phone='" + phone + '\'' +
+                ", role='" + role + '\'' +
                 ", createdAt='" + createdAt + '\'' +
                 '}';
     }

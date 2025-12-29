@@ -9,6 +9,7 @@ public class SharedPrefManager {
     private static final String KEY_USERNAME = "key_username";
     private static final String KEY_EMAIL = "key_email";
     private static final String KEY_FULL_NAME = "key_full_name";
+    private static final String KEY_ROLE = "key_role";
     private static final String KEY_IS_LOGGED_IN = "key_is_logged_in";
 
     private static SharedPrefManager mInstance;
@@ -34,6 +35,7 @@ public class SharedPrefManager {
         editor.putString(KEY_USERNAME, user.getUsername());
         editor.putString(KEY_EMAIL, user.getEmail());
         editor.putString(KEY_FULL_NAME, user.getFullName());
+        editor.putString(KEY_ROLE, user.getRole());
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
 
         editor.apply();
@@ -58,6 +60,7 @@ public class SharedPrefManager {
         user.setUsername(sharedPreferences.getString(KEY_USERNAME, null));
         user.setEmail(sharedPreferences.getString(KEY_EMAIL, null));
         user.setFullName(sharedPreferences.getString(KEY_FULL_NAME, null));
+        user.setRole(sharedPreferences.getString(KEY_ROLE, null));
 
         return user;
     }

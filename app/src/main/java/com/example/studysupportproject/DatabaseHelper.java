@@ -272,7 +272,7 @@ public class DatabaseHelper {
             con = conSQL.conclass();
             if (con == null) return null;
 
-            String query = "SELECT * FROM users WHERE id = ?";
+            String query = "SELECT u.*, r.role_name FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.id = ?";
             stmt = con.prepareStatement(query);
             stmt.setInt(1, user_id);
 
@@ -287,6 +287,7 @@ public class DatabaseHelper {
                 user.setAvatar(rs.getString("avatar") != null ? rs.getString("avatar") : "");
                 user.setPhone(rs.getString("phone") != null ? rs.getString("phone") : "");
                 user.setCreatedAt(rs.getString("created_at") != null ? rs.getString("created_at") : "");
+                user.setRole(rs.getString("role_name") != null ? rs.getString("role_name") : "student");
             }
         } catch (SQLException e) {
             Log.e(TAG, "Error getting user by id: " + e.getMessage());
