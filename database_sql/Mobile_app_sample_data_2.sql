@@ -218,48 +218,36 @@ INSERT INTO posts (title, content, author_id, post_type, is_published, published
 
 -- ===== 10. GRADES (depends on users, classes) =====
 INSERT INTO grades (student_id, class_id, grade_value, grade_type, notes) VALUES
--- Học sinh 21520001 (Nguyễn Minh Anh)
-(7, 2, 8.5, N'midterm', N'Good progress'),
-(7, 2, 9.0, N'final', N'Excellent performance'),
-(7, 2, 7.5, N'midterm', N'Satisfactory'),
-(7, 2, 8.0, N'final', N'Good'),
-(7, 2, 9.0, N'midterm', N'Very good'),
-(7, 2, 9.5, N'final', N'Outstanding'),
--- Học sinh 21520002 (Trần Văn Bình)
-(8, 2, 7.0, N'midterm', N'Average'),
-(8, 2, 7.5, N'final', N'Good'),
-(8, 2, 8.0, N'midterm', N'Good'),
-(8, 2, 8.5, N'final', N'Very good'),
-(8, 2, 6.5, N'midterm', N'Needs improvement'),
-(8, 2, 7.0, N'final', N'Satisfactory'),
--- Học sinh 21520003 (Lê Thị Cẩm)
-(9, 2, 9.5, N'midterm', N'Excellent'),
-(9, 2, 9.5, N'final', N'Excellent'),
-(9, 2, 9.0, N'midterm', N'Outstanding'),
-(9, 2, 9.5, N'final', N'Outstanding'),
-(9, 2, 8.5, N'midterm', N'Very good'),
-(9, 2, 9.0, N'final', N'Very good'),
--- Học sinh 21520004 (Phạm Quốc Dũng)
-(10, 2, 8.0, N'midterm', N'Good'),
-(10, 2, 8.5, N'final', N'Very good'),
-(10, 2, 7.0, N'midterm', N'Satisfactory'),
-(10, 2, 7.5, N'final', N'Good'),
-(10, 2, 7.5, N'midterm', N'Good'),
-(10, 2, 8.0, N'final', N'Good'),
--- Học sinh hs10001
-(13, 5, 8.0, N'midterm', N'Good'),
-(13, 5, 8.5, N'final', N'Very good'),
-(13, 5, 7.5, N'midterm', N'Good'),
-(13, 5, 8.0, N'final', N'Good'),
-(13, 5, 9.0, N'midterm', N'Excellent'),
-(13, 5, 9.0, N'final', N'Excellent'),
--- Học sinh hs10002
-(14, 5, 7.0, N'midterm', N'Satisfactory'),
-(14, 5, 7.5, N'final', N'Good'),
-(14, 5, 8.5, N'midterm', N'Very good'),
-(14, 5, 9.0, N'final', N'Excellent'),
-(14, 5, 8.0, N'midterm', N'Good'),
-(14, 5, 8.5, N'final', N'Very good');
+-- Học sinh 21520001 (Nguyễn Minh Anh) - Classes
+(7, 2, 8.5, N'quá trình', N'Tham gia tích cực, làm bài tập đầy đủ'),
+(7, 2, 9.0, N'giữa kỳ', N'Kết quả thi giữa kỳ tốt'),
+(7, 2, 8.5, N'cuối kỳ', N'Kết quả thi cuối kỳ rất tốt'),
+(7, 2, 9.0, N'thực hành', N'Thực hành rất tốt, mã code sạch'),
+-- Học sinh 21520002 (Trần Văn Bình) - Classes
+(8, 2, 7.0, N'quá trình', N'Tham gia đều đặn'),
+(8, 2, 7.5, N'giữa kỳ', N'Kết quả khá'),
+(8, 2, 8.0, N'cuối kỳ', N'Kết quả tốt'),
+(8, 2, 7.5, N'thực hành', N'Thực hành tốt'),
+-- Học sinh 21520003 (Lê Thị Cẩm) - Classes
+(9, 2, 9.5, N'quá trình', N'Rất tích cực, làm bài tập xuất sắc'),
+(9, 2, 9.5, N'giữa kỳ', N'Kết quả thi giữa kỳ xuất sắc'),
+(9, 2, 9.0, N'cuối kỳ', N'Kết quả thi cuối kỳ rất tốt'),
+(9, 2, 9.5, N'thực hành', N'Thực hành xuất sắc'),
+-- Học sinh 21520004 (Phạm Quốc Dũng) - Classes
+(10, 2, 8.0, N'quá trình', N'Tham gia tốt'),
+(10, 2, 8.5, N'giữa kỳ', N'Kết quả tốt'),
+(10, 2, 7.5, N'cuối kỳ', N'Kết quả khá'),
+(10, 2, 8.0, N'thực hành', N'Thực hành tốt'),
+-- Học sinh hs10001 - Classes
+(13, 5, 8.0, N'quá trình', N'Học tập đều đặn'),
+(13, 5, 8.5, N'giữa kỳ', N'Kết quả tốt'),
+(13, 5, 9.0, N'cuối kỳ', N'Kết quả rất tốt'),
+(13, 5, 8.5, N'thực hành', N'Thực hành tốt'),
+-- Học sinh hs10002 - Classes
+(14, 5, 7.0, N'quá trình', N'Tham gia bình thường'),
+(14, 5, 7.5, N'giữa kỳ', N'Kết quả khá'),
+(14, 5, 8.5, N'cuối kỳ', N'Kết quả tốt'),
+(14, 5, 8.0, N'thực hành', N'Thực hành khá');
 
 -- ===== 11. PERSONAL SCHEDULES (depends on users) =====
 INSERT INTO personal_schedules (user_id, title, description, schedule_date, start_time, end_time, schedule_type) VALUES

@@ -154,7 +154,7 @@ CREATE TABLE grades (
     student_id INT NOT NULL,
     class_id INT NOT NULL,
     grade_value DECIMAL(5,2) NOT NULL,
-    grade_type NVARCHAR(50) DEFAULT N'midterm', 
+    grade_type NVARCHAR(50) NOT NULL CHECK (grade_type IN (N'quá trình', N'giữa kỳ', N'cuối kỳ', N'thực hành')),
     notes NTEXT,
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE(),

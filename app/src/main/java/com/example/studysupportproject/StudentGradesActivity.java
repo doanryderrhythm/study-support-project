@@ -71,7 +71,7 @@ public class StudentGradesActivity extends AppCompatActivity {
         // Fetch grades from database
         List<Grade> allGrades = new ArrayList<>();
         List<String> semesters = new ArrayList<>();
-        Map<String, List<Grade>> gradesBySemester = new HashMap<>();
+        Map<String, Map<String, List<Grade>>> gradesBySemesterAndClass = new HashMap<>();
 
         try {
             // Query: SELECT grades with semester information for current student
@@ -111,17 +111,21 @@ public class StudentGradesActivity extends AppCompatActivity {
 
                     allGrades.add(grade);
 
-                    // Group by semester (without school_year)
+                    // Group by semester first, then by class
                     String semesterKey = grade.getSemesterName();
+                    String classKey = grade.getSubjectName();
+                    
                     if (!semesters.contains(semesterKey)) {
                         semesters.add(semesterKey);
                     }
 
-                    gradesBySemester.computeIfAbsent(semesterKey, k -> new ArrayList<>()).add(grade);
+                    gradesBySemesterAndClass.computeIfAbsent(semesterKey, k -> new HashMap<>())
+                            .computeIfAbsent(classKey, k -> new ArrayList<>())
+                            .add(grade);
                 }
 
                 // Set adapter
-                gradesAdapter = new GradesAdapter(semesters, gradesBySemester);
+                gradesAdapter = new GradesAdapter(semesters, gradesBySemesterAndClass);
                 gradesRecyclerView.setAdapter(gradesAdapter);
             } else {
                 Toast.makeText(this, "No grades found", Toast.LENGTH_SHORT).show();
