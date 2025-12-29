@@ -75,29 +75,35 @@ public class StudentGradesActivity extends AppCompatActivity {
 
         try {
             // Query: SELECT grades with semester information for current student
-            String query = "SELECT g.id, g.student_id, g.class_id, g.subject_name, " +
-                    "g.grade_value, g.grade_type, g.semester_id, s.semester_name, " +
-                    "g.school_year, g.teacher_id, g.notes, g.created_at, g.updated_at " +
+            String query = "SELECT g.id, g.student_id, g.class_id, " +
+                    "g.grade_value, g.grade_type, g.notes, " +
+                    "c.semester_id, c.class_name, s.semester_name, u.full_name as teacher_name, " +
+                    "g.created_at, g.updated_at " +
                     "FROM grades g " +
-                    "LEFT JOIN semesters s ON g.semester_id = s.id " +
+                    "INNER JOIN classes c ON g.class_id = c.id " +
+                    "LEFT JOIN semesters s ON c.semester_id = s.id " +
+                    "LEFT JOIN class_teachers ct ON c.id = ct.class_id " +
+                    "LEFT JOIN users u ON ct.teacher_id = u.id " +
                     "WHERE g.student_id = " + userId + " " +
-                    "ORDER BY g.semester_id DESC, g.subject_name ASC";
+                    "ORDER BY c.semester_id DESC, c.class_name ASC";
+
 
             List<Map<String, String>> result = conSQL.executeQuery(query);
 
             if (result != null && !result.isEmpty()) {
                 for (Map<String, String> row : result) {
+                    // Create grade using class name instead of subject_name
                     Grade grade = new Grade(
                             Integer.parseInt(row.getOrDefault("id", "0")),
                             Integer.parseInt(row.getOrDefault("student_id", "0")),
                             Integer.parseInt(row.getOrDefault("class_id", "0")),
-                            row.getOrDefault("subject_name", ""),
+                            row.getOrDefault("class_name", ""), // Use class_name instead of subject_name
                             Double.parseDouble(row.getOrDefault("grade_value", "0")),
                             row.getOrDefault("grade_type", ""),
                             Integer.parseInt(row.getOrDefault("semester_id", "0")),
                             row.getOrDefault("semester_name", "Unknown Semester"),
-                            row.getOrDefault("school_year", ""),
-                            Integer.parseInt(row.getOrDefault("teacher_id", "0")),
+                            "", // school_year removed from schema, use empty string
+                            0, // teacherId not in grades table anymore
                             row.getOrDefault("notes", ""),
                             row.getOrDefault("created_at", ""),
                             row.getOrDefault("updated_at", "")
@@ -105,8 +111,8 @@ public class StudentGradesActivity extends AppCompatActivity {
 
                     allGrades.add(grade);
 
-                    // Group by semester
-                    String semesterKey = grade.getSemesterName() + " (" + grade.getSchoolYear() + ")";
+                    // Group by semester (without school_year)
+                    String semesterKey = grade.getSemesterName();
                     if (!semesters.contains(semesterKey)) {
                         semesters.add(semesterKey);
                     }

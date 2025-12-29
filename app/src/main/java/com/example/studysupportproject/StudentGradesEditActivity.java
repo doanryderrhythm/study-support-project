@@ -102,16 +102,17 @@ public class StudentGradesEditActivity extends AppCompatActivity {
             try {
                 int teacherId = SharedPrefManager.getInstance(this).getUser().getId();
 
-                String query = "SELECT g.id, g.student_id, g.class_id, g.subject_name, " +
-                        "g.grade_value, g.grade_type, g.semester_id, s.semester_name, " +
-                        "g.school_year, g.teacher_id, g.notes, g.created_at, g.updated_at " +
+                String query = "SELECT g.id, g.student_id, g.class_id, " +
+                        "g.grade_value, g.grade_type, g.notes, " +
+                        "c.semester_id, c.class_name, s.semester_name, g.created_at, g.updated_at " +
                         "FROM grades g " +
-                        "LEFT JOIN semesters s ON g.semester_id = s.id " +
-                        "LEFT JOIN classes c ON g.class_id = c.id " +
-                        "WHERE g.teacher_id = " + teacherId + " " +
+                        "INNER JOIN classes c ON g.class_id = c.id " +
+                        "LEFT JOIN semesters s ON c.semester_id = s.id " +
+                        "LEFT JOIN class_teachers ct ON c.id = ct.class_id " +
+                        "WHERE ct.teacher_id = " + teacherId + " " +
                         "AND c.class_name = '" + className + "' " +
                         "AND s.semester_name = '" + semesterName + "' " +
-                        "ORDER BY g.student_id, g.subject_name";
+                        "ORDER BY g.student_id, c.class_name";
 
                 List<java.util.Map<String, String>> results = conSQL.executeQuery(query);
 
@@ -121,13 +122,13 @@ public class StudentGradesEditActivity extends AppCompatActivity {
                                 Integer.parseInt(row.getOrDefault("id", "0")),
                                 Integer.parseInt(row.getOrDefault("student_id", "0")),
                                 Integer.parseInt(row.getOrDefault("class_id", "0")),
-                                row.getOrDefault("subject_name", ""),
+                                row.getOrDefault("class_name", ""), // Use class_name instead of subject_name
                                 Double.parseDouble(row.getOrDefault("grade_value", "0")),
                                 row.getOrDefault("grade_type", ""),
                                 Integer.parseInt(row.getOrDefault("semester_id", "0")),
                                 row.getOrDefault("semester_name", ""),
-                                row.getOrDefault("school_year", ""),
-                                Integer.parseInt(row.getOrDefault("teacher_id", "0")),
+                                "", 
+                                0, 
                                 row.getOrDefault("notes", ""),
                                 row.getOrDefault("created_at", ""),
                                 row.getOrDefault("updated_at", "")

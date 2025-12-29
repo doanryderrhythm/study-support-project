@@ -217,12 +217,24 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(MainActivity.this, AccountMenuActivity.class);
                     startActivity(intent);
                     drawerLayout.closeDrawer(GravityCompat.END);
+                } else if (itemId == R.id.nav_logout) {
+                    logout();
                 }
 
                 drawerLayout.closeDrawer(GravityCompat.END);
                 return true;
             }
         });
+    }
+
+    private void logout() {
+        SharedPrefManager.getInstance(this).logout();
+        
+        
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void setupBottomNavigation() {

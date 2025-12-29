@@ -90,12 +90,11 @@ public class ClassListActivity extends AppCompatActivity {
             try {
                 int teacherId = SharedPrefManager.getInstance(this).getUser().getId();
 
-                String query = "SELECT DISTINCT c.class_name " +
+                String query = "SELECT DISTINCT c.class_name, c.id " +
                         "FROM classes c " +
-                        "INNER JOIN grades g ON g.class_id = c.id " +
-                        "INNER JOIN semesters s ON g.semester_id = s.id " +
-                        "WHERE g.teacher_id = " + teacherId + " " +
-                        "AND s.semester_name = '" + semesterName + "' " +
+                        "INNER JOIN class_teachers ct ON c.id = ct.class_id " +
+                        "WHERE ct.teacher_id = " + teacherId + " " +
+                        "AND c.semester_id = (SELECT id FROM semesters WHERE semester_name = '" + semesterName + "') " +
                         "ORDER BY c.class_name";
 
                 List<String> classes = new ArrayList<>();

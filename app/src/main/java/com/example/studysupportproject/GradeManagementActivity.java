@@ -86,9 +86,9 @@ public class GradeManagementActivity extends AppCompatActivity {
 
                 String query = "SELECT DISTINCT s.semester_name " +
                         "FROM semesters s " +
-                        "INNER JOIN classes c ON s.id = c.id " +
-                        "INNER JOIN grades g ON g.class_id = c.id " +
-                        "WHERE g.teacher_id = " + teacherId + " " +
+                        "INNER JOIN classes c ON s.id = c.semester_id " +
+                        "INNER JOIN class_teachers ct ON c.id = ct.class_id " +
+                        "WHERE ct.teacher_id = " + teacherId + " " +
                         "ORDER BY s.semester_name";
 
                 List<String> semesters = new ArrayList<>();
