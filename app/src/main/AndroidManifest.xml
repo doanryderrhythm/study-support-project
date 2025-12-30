@@ -74,10 +74,40 @@
             android:name=".ClassListActivity"
             android:exported="false" />
         <activity
+            android:name=".SchoolListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SchoolDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SemesterListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SemesterDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SubjectListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ClassDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".StudentSelectionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TeacherSelectionActivity"
+            android:exported="false" />
+        <activity
             android:name=".StudentGradesEditActivity"
             android:exported="false" />
         <activity
             android:name=".ScheduleDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".StudentListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TeacherListActivity"
             android:exported="false" />
 
     </application>

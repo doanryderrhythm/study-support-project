@@ -1,217 +1,292 @@
-﻿USE Mobile_app;
+-- Sample Data for Mobile_app Database
+USE Mobile_app;
 GO
 
--- =====================================================
--- INSERT SAMPLE USERS
--- =====================================================
+--delete all data
+EXEC sys.sp_msforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT ALL'
+EXEC sys.sp_msforeachtable 'DELETE FROM ?'
+EXEC sys.sp_MSForEachTable 'ALTER TABLE ? CHECK CONSTRAINT ALL'
+EXEC sys.sp_MSForEachTable 'IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(''?'')) DBCC CHECKIDENT (''?'', RESEED, 1);'
 
--- Admin already exists (username: Danh)
+-- INSERT ORDER (respecting FK constraints):
+-- 1. Roles and Permissions (no dependencies)
+-- 2. Schools, Semesters (no dependencies)
+-- 3. School_Semesters (depends on schools, semesters)
+-- 4. Subjects (depends on schools)
+-- 5. Users (depends on roles)
+-- 6. User_Roles (depends on users, roles)
+-- 7. Classes (depends on schools, semesters)
+-- 8. Class_Teachers, Class_Students, Class_Subjects (depend on classes, users, subjects)
+-- 9. Posts (depends on users)
+-- 10. Grades (depends on users, classes)
+-- 11. Other tables (personal_schedules, social_settings, login_history, password_resets)
 
--- Insert Teachers
-INSERT INTO users (username, password, email, full_name, date_of_birth, phone, address, is_active) VALUES
-(N'nguyenvana', N'teacher123', N'nguyenvana@school.edu.vn', N'Nguyễn Văn A', '1985-03-15', N'0901234567', N'123 Lê Lợi, Q1, TP.HCM', 1),
-(N'tranthib', N'teacher123', N'tranthib@school.edu.vn', N'Trần Thị B', '1987-07-20', N'0902345678', N'456 Nguyễn Huệ, Q1, TP.HCM', 1),
-(N'levanc', N'teacher123', N'levanc@school.edu.vn', N'Lê Văn C', '1990-11-10', N'0903456789', N'789 Pasteur, Q3, TP.HCM', 1),
-(N'phamthid', N'teacher123', N'phamthid@school.edu.vn', N'Phạm Thị D', '1988-05-25', N'0904567890', N'321 Võ Văn Tần, Q3, TP.HCM', 1);
+-- ===== 1. ROLES AND PERMISSIONS =====
+INSERT INTO roles (role_name, description) VALUES
+(N'admin', N'Quản trị hệ thống - Toàn quyền'),
+(N'teacher', N'Giáo viên - Quản lý lớp học và điểm số'),
+(N'student', N'Học sinh - Xem điểm và bài viết');
 
--- Insert Students
-INSERT INTO users (username, password, email, full_name, date_of_birth, phone, address, is_active) VALUES
-(N'student001', N'student123', N'nguyenminhe@student.edu.vn', N'Nguyễn Minh E', '2008-01-15', N'0911111111', N'12 Trần Hưng Đạo, Q5, TP.HCM', 1),
-(N'student002', N'student123', N'tranthif@student.edu.vn', N'Trần Thị F', '2008-03-20', N'0922222222', N'34 Lý Thường Kiệt, Q10, TP.HCM', 1),
-(N'student003', N'student123', N'levang@student.edu.vn', N'Lê Văn G', '2008-05-10', N'0933333333', N'56 Hai Bà Trưng, Q1, TP.HCM', 1),
-(N'student004', N'student123', N'phamthih@student.edu.vn', N'Phạm Thị H', '2008-07-08', N'0944444444', N'78 Điện Biên Phủ, Q3, TP.HCM', 1),
-(N'student005', N'student123', N'hoangvani@student.edu.vn', N'Hoàng Văn I', '2008-09-12', N'0955555555', N'90 Cách Mạng Tháng 8, Q10, TP.HCM', 1),
-(N'student006', N'student123', N'vuthik@student.edu.vn', N'Vũ Thị K', '2008-11-25', N'0966666666', N'11 Nguyễn Thị Minh Khai, Q1, TP.HCM', 1),
-(N'student007', N'student123', N'dovanl@student.edu.vn', N'Đỗ Văn L', '2008-02-14', N'0977777777', N'22 Lê Duẩn, Q1, TP.HCM', 1),
-(N'student008', N'student123', N'buithim@student.edu.vn', N'Bùi Thị M', '2008-04-18', N'0988888888', N'33 Võ Thị Sáu, Q3, TP.HCM', 1);
+INSERT INTO permissions (permission_name, description) VALUES
+(N'user_management', N'Quản lý người dùng'),
+(N'login', N'Đăng nhập hệ thống'),
+(N'register', N'Đăng ký tài khoản'),
+(N'view_posts', N'Xem bài viết'),
+(N'create_posts', N'Đăng bài viết'),
+(N'edit_posts', N'Sửa bài viết'),
+(N'delete_posts', N'Xóa bài viết'),
+(N'publish_posts', N'Xuất bản bài viết'),
+(N'view_grades', N'Xem điểm'),
+(N'manage_grades', N'Quản lý điểm'),
+(N'export_grades', N'Xuất bảng điểm'),
+(N'view_schedule', N'Xem lịch'),
+(N'manage_schedule', N'Quản lý lịch'),
+(N'view_personal_calendar', N'Xem lịch cá nhân'),
+(N'system_settings', N'Cài đặt hệ thống'),
+(N'social_settings', N'Cài đặt mạng xã hội'),
+(N'privacy_settings', N'Cài đặt bảo mật'),
+(N'password_reset', N'Đặt lại mật khẩu'),
+(N'account_security', N'Bảo mật tài khoản'),
+(N'view_login_history', N'Xem lịch sử đăng nhập');
 
-GO
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id FROM roles r, permissions p 
+WHERE r.role_name = N'admin';
 
--- =====================================================
--- ASSIGN ROLES TO USERS
--- =====================================================
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id FROM roles r, permissions p 
+WHERE r.role_name = N'teacher'
+AND p.permission_name IN (N'view_posts', N'create_posts', N'edit_posts', N'publish_posts', 
+                         N'view_grades', N'manage_grades', N'export_grades',
+                         N'view_schedule', N'manage_schedule');
 
--- Assign teacher role (role_id = 2)
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id FROM roles r, permissions p 
+WHERE r.role_name = N'student'
+AND p.permission_name IN (N'view_posts', N'view_grades', N'view_schedule', 
+                         N'view_personal_calendar', N'password_reset', N'account_security');
+
+-- ===== 2. SCHOOLS AND SEMESTERS =====
+INSERT INTO schools (school_name) VALUES
+(N'Trường Đại học UIT'),
+(N'Trường THPT Lê Hồng Phong'),
+(N'Trường THPT Nguyễn Thị Minh Khai');
+
+INSERT INTO semesters (semester_name) VALUES
+(N'Học kỳ 1 - 2024-2025'),
+(N'Học kỳ 2 - 2024-2025'),
+(N'Học kỳ 3 - 2024-2025');
+
+-- ===== 3. SCHOOL_SEMESTERS JUNCTION =====
+INSERT INTO school_semesters (school_id, semester_id) VALUES
+(1, 1), (1, 2), (1, 3), -- UIT
+(2, 1), (2, 2), (2, 3), -- THPT Lê Hồng Phong
+(3, 1), (3, 2), (3, 3); -- THPT Nguyễn Thị Minh Khai
+
+-- ===== 4. SUBJECTS (depends on schools) =====
+INSERT INTO subjects (subject_name, school_id, description) VALUES
+-- UIT subjects
+(N'Lập trình hướng đối tượng', 1, N'Ngôn ngữ lập trình Java/C++'),
+(N'Cơ sở dữ liệu', 1, N'SQL Server/MySQL'),
+(N'Mạng máy tính', 1, N'Computer Networks'),
+(N'Cấu trúc dữ liệu', 1, N'Data Structures'),
+(N'Hệ điều hành', 1, N'Operating Systems'),
+-- THPT subjects
+(N'Toán', 2, N'Đại số, Hình học, Giải tích'),
+(N'Văn', 2, N'Tiếng Việt, Văn học'),
+(N'Tiếng Anh', 2, N'English language'),
+(N'Vật lý', 2, N'Physics'),
+(N'Hóa học', 2, N'Chemistry'),
+(N'Toán', 3, N'Đại số, Hình học, Giải tích'),
+(N'Văn', 3, N'Tiếng Việt, Văn học'),
+(N'Tiếng Anh', 3, N'English language');
+
+-- ===== 5. USERS (depends on roles) =====
+INSERT INTO users (username, password, email, full_name, date_of_birth, role_id, phone, address, is_active) 
+VALUES (N'admin1', N'admin123', N'admin1@gmail.com', N'Nguyễn Văn B', '1985-03-15', 1, N'0901334567', N'128 Lý Thường Kiệt, Q10, TP.HCM', 1);
+
+INSERT INTO users (username, password, email, full_name, date_of_birth, role_id, phone, address, is_active) VALUES
+-- Giáo viên UIT
+(N'gv_nguyenvana', N'teacher123', N'nguyenvana@uit.edu.vn', N'Nguyễn Văn A', '1985-03-15', 2, N'0901234567', N'123 Lý Thường Kiệt, Q10, TP.HCM', 1),
+(N'gv_tranthib', N'teacher123', N'tranthib@uit.edu.vn', N'Trần Thị B', '1988-07-20', 2, N'0902234567', N'456 Nguyễn Văn Cừ, Q5, TP.HCM', 1),
+(N'gv_levanc', N'teacher123', N'levanc@uit.edu.vn', N'Lê Văn C', '1982-11-10', 2, N'0903234567', N'789 Trần Hưng Đạo, Q1, TP.HCM', 1),
+-- Giáo viên THPT
+(N'gv_phamthid', N'teacher123', N'phamthid@lhp.edu.vn', N'Phạm Thị D', '1987-05-25', 2, N'0904234567', N'321 Lê Lợi, Q1, TP.HCM', 1),
+(N'gv_hoangvane', N'teacher123', N'hoangvane@ntmk.edu.vn', N'Hoàng Văn E', '1990-09-12', 2, N'0905234567', N'654 Võ Văn Kiệt, Q6, TP.HCM', 1);
+
+INSERT INTO users (username, password, email, full_name, date_of_birth, role_id, phone, address, is_active) VALUES
+-- Học sinh SE114
+(N'21520001', N'student123', N'21520001@gm.uit.edu.vn', N'Nguyễn Minh Anh', '2003-01-15', 3, N'0911111111', N'12 Nguyễn Trãi, Q5, TP.HCM', 1),
+(N'21520002', N'student123', N'21520002@gm.uit.edu.vn', N'Trần Văn Bình', '2003-03-20', 3, N'0911111112', N'34 Lê Lai, Q1, TP.HCM', 1),
+(N'21520003', N'student123', N'21520003@gm.uit.edu.vn', N'Lê Thị Cẩm', '2003-05-10', 3, N'0911111113', N'56 Hai Bà Trưng, Q3, TP.HCM', 1),
+(N'21520004', N'student123', N'21520004@gm.uit.edu.vn', N'Phạm Quốc Dũng', '2003-07-08', 3, N'0911111114', N'78 Điện Biên Phủ, Q10, TP.HCM', 1),
+-- Học sinh SE113
+(N'21520011', N'student123', N'21520011@gm.uit.edu.vn', N'Võ Thị Hoa', '2003-02-14', 3, N'0911111121', N'90 Cách Mạng Tháng 8, Q3, TP.HCM', 1),
+(N'21520012', N'student123', N'21520012@gm.uit.edu.vn', N'Đặng Văn Khoa', '2003-04-22', 3, N'0911111122', N'12 Trường Chinh, QTB, TP.HCM', 1),
+-- Học sinh THPT
+(N'hs10001', N'student123', N'hs10001@lhp.edu.vn', N'Nguyễn Văn Nam', '2008-06-15', 3, N'0912222221', N'123 Lý Tự Trọng, Q1, TP.HCM', 1),
+(N'hs10002', N'student123', N'hs10002@lhp.edu.vn', N'Trần Thị Oanh', '2008-08-20', 3, N'0912222222', N'456 Pasteur, Q3, TP.HCM', 1),
+(N'hs11001', N'student123', N'hs11001@ntmk.edu.vn', N'Lê Minh Phát', '2007-03-10', 3, N'0913333331', N'789 Nguyễn Đình Chiểu, Q3, TP.HCM', 1),
+(N'hs11002', N'student123', N'hs11002@ntmk.edu.vn', N'Phạm Thu Quỳnh', '2007-11-25', 3, N'0913333332', N'321 Cao Thắng, Q10, TP.HCM', 1);
+
+-- ===== 6. USER_ROLES (depends on users, roles) =====
 INSERT INTO user_roles (user_id, role_id, granted_by) VALUES
-(2, 2, 1), -- Nguyễn Văn A
-(3, 2, 1), -- Trần Thị B
-(4, 2, 1), -- Lê Văn C
-(5, 2, 1); -- Phạm Thị D
+(1, 1, 1);
 
--- Assign student role (role_id = 3)
 INSERT INTO user_roles (user_id, role_id, granted_by) VALUES
-(6, 3, 1),  -- student001
-(7, 3, 1),  -- student002
-(8, 3, 1),  -- student003
-(9, 3, 1),  -- student004
-(10, 3, 1), -- student005
-(11, 3, 1), -- student006
-(12, 3, 1), -- student007
-(13, 3, 1); -- student008
+(2, 2, 1), -- gv_nguyenvana
+(3, 2, 1), -- gv_tranthib
+(4, 2, 1), -- gv_levanc
+(5, 2, 1), -- gv_phamthid
+(6, 2, 1); -- gv_hoangvane
 
-GO
+INSERT INTO user_roles (user_id, role_id, granted_by) VALUES
+(7, 3, 1),  -- 21520001
+(8, 3, 1),  -- 21520002
+(9, 3, 1),  -- 21520003
+(10, 3, 1), -- 21520004
+(11, 3, 1), -- 21520011
+(12, 3, 1), -- 21520012
+(13, 3, 1), -- hs10001
+(14, 3, 1), -- hs10002
+(15, 3, 1), -- hs11001
+(16, 3, 1); -- hs11002
 
--- =====================================================
--- INSERT POSTS
--- =====================================================
+-- ===== 7. CLASSES (depends on schools, semesters) =====
+INSERT INTO classes (class_name, school_id, semester_id) VALUES
+-- UIT classes
+(N'SE113', 1, 1),
+(N'SE114', 1, 1),
+(N'SE115', 1, 1),
+(N'IT001', 1, 1),
+-- THPT Lê Hồng Phong
+(N'10A1', 2, 1),
+(N'11A2', 2, 1),
+(N'12A3', 2, 1),
+-- THPT Nguyễn Thị Minh Khai
+(N'10B1', 3, 1),
+(N'11B2', 3, 1),
+(N'12B3', 3, 1);
 
+-- ===== 8. JUNCTION TABLES (depends on classes, users, subjects) =====
+INSERT INTO class_teachers (class_id, teacher_id) VALUES
+(1, 2),  -- SE113 - gv_nguyenvana
+(2, 2),  -- SE114 - gv_nguyenvana
+(3, 3),  -- SE115 - gv_tranthib
+(4, 4),  -- IT001 - gv_levanc
+(5, 5),  -- 10A1 - gv_phamthid
+(8, 6);  -- 10B1 - gv_hoangvane
+
+INSERT INTO class_students (class_id, student_id) VALUES
+-- SE113 students
+(1, 11), -- 21520011 Võ Thị Hoa
+(1, 12), -- 21520012 Đặng Văn Khoa
+-- SE114 students (id=2)
+(2, 7),  -- 21520001 Nguyễn Minh Anh
+(2, 8),  -- 21520002 Trần Văn Bình
+(2, 9),  -- 21520003 Lê Thị Cẩm
+(2, 10), -- 21520004 Phạm Quốc Dũng
+-- SE115 students (id=3)
+-- IT001 students (id=4)
+-- 10A1 students (id=5)
+(5, 13), -- hs10001 Nguyễn Văn Nam
+(5, 14), -- hs10002 Trần Thị Oanh
+-- 10B1 students (id=8)
+(8, 15), -- hs11001 Lê Minh Phát
+(8, 16); -- hs11002 Phạm Thu Quỳnh
+
+INSERT INTO class_subjects (class_id, subject_id) VALUES
+-- SE114 (class_id=2): Cơ sở dữ liệu
+(2, 2),
+-- IT001 (class_id=4): Lập trình hướng đối tượng  
+(4, 1),
+-- 10A1 (class_id=5): Toán
+(5, 6),
+-- 10B1 (class_id=8): Tiếng Anh
+(8, 8);
+
+-- ===== 9. POSTS (depends on users) =====
 INSERT INTO posts (title, content, author_id, post_type, is_published, published_at) VALUES
-(N'Thông báo lịch nghỉ Tết Nguyên Đán 2025', 
- N'Kính gửi quý phụ huynh và các em học sinh, Nhà trường thông báo lịch nghỉ Tết Nguyên Đán 2025 từ ngày 25/01 đến 02/02/2025. Học sinh trở lại học vào ngày 03/02/2025.',
- 1, N'announcement', 1, '2024-12-10 09:00:00'),
+(N'Thông báo lịch thi học kỳ 1', N'Lịch thi học kỳ 1 năm học 2024-2025 sẽ được tổ chức từ ngày 15/01/2025. Sinh viên vui lòng xem chi tiết lịch thi trên website của trường.', 2, N'announcement', 1, GETDATE()),
+(N'Hướng dẫn sử dụng hệ thống', N'Hệ thống quản lý học tập mới đã được triển khai. Vui lòng đọc kỹ hướng dẫn để sử dụng hiệu quả.', 1, N'general', 1, GETDATE()),
+(N'Thông báo nghỉ lễ Tết Nguyên Đán', N'Nhà trường thông báo lịch nghỉ Tết Nguyên Đán 2025 từ ngày 25/01 đến 05/02/2025. Chúc mọi người năm mới vui vẻ!', 1, N'announcement', 1, GETDATE()),
+(N'Kết quả thi giữa kỳ môn Lập trình hướng đối tượng', N'Kết quả thi giữa kỳ đã được cập nhật. Sinh viên có thể xem điểm trên hệ thống.', 2, N'grade', 1, GETDATE()),
+(N'Thông báo đăng ký môn học kỳ 2', N'Thời gian đăng ký môn học kỳ 2 từ 01/12 đến 15/12/2024. Sinh viên lưu ý đăng ký đúng thời hạn.', 3, N'announcement', 1, GETDATE()),
+(N'Họp phụ huynh cuối học kỳ', N'Trường tổ chức họp phụ huynh vào ngày 20/12/2024 để báo cáo kết quả học tập của các em.', 5, N'announcement', 1, GETDATE());
 
-(N'Kế hoạch thi học kỳ I năm học 2024-2025',
- N'Thời gian thi học kỳ I sẽ diễn ra từ ngày 18/12 đến 24/12/2024. Học sinh cần chuẩn bị tài liệu và ôn tập kỹ lưỡng.',
- 2, N'announcement', 1, '2024-12-05 10:30:00'),
+-- ===== 10. GRADES (depends on users, classes) =====
+INSERT INTO grades (student_id, class_id, grade_value, grade_type, notes) VALUES
+-- Học sinh 21520001 (Nguyễn Minh Anh) - Classes
+(7, 2, 8.5, N'quá trình', N'Tham gia tích cực, làm bài tập đầy đủ'),
+(7, 2, 9.0, N'giữa kỳ', N'Kết quả thi giữa kỳ tốt'),
+(7, 2, 8.5, N'cuối kỳ', N'Kết quả thi cuối kỳ rất tốt'),
+(7, 2, 9.0, N'thực hành', N'Thực hành rất tốt, mã code sạch'),
+-- Học sinh 21520002 (Trần Văn Bình) - Classes
+(8, 2, 7.0, N'quá trình', N'Tham gia đều đặn'),
+(8, 2, 7.5, N'giữa kỳ', N'Kết quả khá'),
+(8, 2, 8.0, N'cuối kỳ', N'Kết quả tốt'),
+(8, 2, 7.5, N'thực hành', N'Thực hành tốt'),
+-- Học sinh 21520003 (Lê Thị Cẩm) - Classes
+(9, 2, 9.5, N'quá trình', N'Rất tích cực, làm bài tập xuất sắc'),
+(9, 2, 9.5, N'giữa kỳ', N'Kết quả thi giữa kỳ xuất sắc'),
+(9, 2, 9.0, N'cuối kỳ', N'Kết quả thi cuối kỳ rất tốt'),
+(9, 2, 9.5, N'thực hành', N'Thực hành xuất sắc'),
+-- Học sinh 21520004 (Phạm Quốc Dũng) - Classes
+(10, 2, 8.0, N'quá trình', N'Tham gia tốt'),
+(10, 2, 8.5, N'giữa kỳ', N'Kết quả tốt'),
+(10, 2, 7.5, N'cuối kỳ', N'Kết quả khá'),
+(10, 2, 8.0, N'thực hành', N'Thực hành tốt'),
+-- Học sinh hs10001 - Classes
+(13, 5, 8.0, N'quá trình', N'Học tập đều đặn'),
+(13, 5, 8.5, N'giữa kỳ', N'Kết quả tốt'),
+(13, 5, 9.0, N'cuối kỳ', N'Kết quả rất tốt'),
+(13, 5, 8.5, N'thực hành', N'Thực hành tốt'),
+-- Học sinh hs10002 - Classes
+(14, 5, 7.0, N'quá trình', N'Tham gia bình thường'),
+(14, 5, 7.5, N'giữa kỳ', N'Kết quả khá'),
+(14, 5, 8.5, N'cuối kỳ', N'Kết quả tốt'),
+(14, 5, 8.0, N'thực hành', N'Thực hành khá');
 
-(N'Hướng dẫn ôn tập môn Toán lớp 10',
- N'Các em học sinh lưu ý ôn tập các chương: Hàm số bậc nhất, phương trình bậc hai, và bất phương trình. Tài liệu đính kèm trong file PDF.',
- 2, N'general', 1, '2024-12-08 14:00:00'),
-
-(N'Thông báo về buổi họp phụ huynh',
- N'Buổi họp phụ huynh học kỳ I sẽ được tổ chức vào ngày 28/12/2024 lúc 8:00 sáng tại hội trường nhà trường.',
- 1, N'announcement', 1, '2024-12-12 08:00:00'),
-
-(N'Bài tập về nhà môn Văn tuần 15',
- N'Học sinh hoàn thành bài tập phân tích tác phẩm "Chiếc lược ngà" và nộp trước ngày 20/12/2024.',
- 3, N'general', 1, '2024-12-13 15:30:00'),
-
-(N'Chúc mừng học sinh đạt giải Olympic',
- N'Xin chúc mừng em Nguyễn Minh E và em Lê Văn G đã đạt giải Nhì Olympic Toán cấp Thành phố. Chúc các em tiếp tục phát huy!',
- 1, N'announcement', 1, '2024-12-14 16:00:00'),
-
-(N'Lịch thi đấu bóng đá liên trường',
- N'Đội tuyển bóng đá trường sẽ tham gia giải đấu liên trường vào ngày 22/12/2024. Mời các bạn đến cổ vũ!',
- 4, N'general', 1, '2024-12-11 11:00:00');
-
-GO
-
--- =====================================================
--- INSERT GRADES
--- =====================================================
-
--- Grades for student001 (user_id = 6)
-INSERT INTO grades (student_id, subject_name, grade_value, grade_type, semester, school_year, teacher_id) VALUES
-(6, N'Toán', 8.5, N'midterm', N'HK1', N'2024-2025', 2),
-(6, N'Toán', 9.0, N'final', N'HK1', N'2024-2025', 2),
-(6, N'Văn', 7.5, N'midterm', N'HK1', N'2024-2025', 3),
-(6, N'Văn', 8.0, N'final', N'HK1', N'2024-2025', 3),
-(6, N'Anh', 9.5, N'midterm', N'HK1', N'2024-2025', 4),
-(6, N'Anh', 9.0, N'final', N'HK1', N'2024-2025', 4),
-(6, N'Lý', 8.0, N'midterm', N'HK1', N'2024-2025', 5),
-(6, N'Lý', 8.5, N'final', N'HK1', N'2024-2025', 5);
-
--- Grades for student002 (user_id = 7)
-INSERT INTO grades (student_id, subject_name, grade_value, grade_type, semester, school_year, teacher_id) VALUES
-(7, N'Toán', 7.0, N'midterm', N'HK1', N'2024-2025', 2),
-(7, N'Toán', 7.5, N'final', N'HK1', N'2024-2025', 2),
-(7, N'Văn', 8.5, N'midterm', N'HK1', N'2024-2025', 3),
-(7, N'Văn', 9.0, N'final', N'HK1', N'2024-2025', 3),
-(7, N'Anh', 8.0, N'midterm', N'HK1', N'2024-2025', 4),
-(7, N'Anh', 8.5, N'final', N'HK1', N'2024-2025', 4),
-(7, N'Lý', 7.5, N'midterm', N'HK1', N'2024-2025', 5),
-(7, N'Lý', 8.0, N'final', N'HK1', N'2024-2025', 5);
-
--- Grades for student003 (user_id = 8)
-INSERT INTO grades (student_id, subject_name, grade_value, grade_type, semester, school_year, teacher_id) VALUES
-(8, N'Toán', 9.0, N'midterm', N'HK1', N'2024-2025', 2),
-(8, N'Toán', 9.5, N'final', N'HK1', N'2024-2025', 2),
-(8, N'Văn', 8.0, N'midterm', N'HK1', N'2024-2025', 3),
-(8, N'Văn', 8.5, N'final', N'HK1', N'2024-2025', 3),
-(8, N'Anh', 9.0, N'midterm', N'HK1', N'2024-2025', 4),
-(8, N'Anh', 9.5, N'final', N'HK1', N'2024-2025', 4),
-(8, N'Lý', 9.0, N'midterm', N'HK1', N'2024-2025', 5),
-(8, N'Lý', 9.0, N'final', N'HK1', N'2024-2025', 5);
-
--- Grades for student004 (user_id = 9)
-INSERT INTO grades (student_id, subject_name, grade_value, grade_type, semester, school_year, teacher_id) VALUES
-(9, N'Toán', 6.5, N'midterm', N'HK1', N'2024-2025', 2),
-(9, N'Toán', 7.0, N'final', N'HK1', N'2024-2025', 2),
-(9, N'Văn', 7.0, N'midterm', N'HK1', N'2024-2025', 3),
-(9, N'Văn', 7.5, N'final', N'HK1', N'2024-2025', 3),
-(9, N'Anh', 7.5, N'midterm', N'HK1', N'2024-2025', 4),
-(9, N'Anh', 8.0, N'final', N'HK1', N'2024-2025', 4),
-(9, N'Lý', 6.0, N'midterm', N'HK1', N'2024-2025', 5),
-(9, N'Lý', 6.5, N'final', N'HK1', N'2024-2025', 5);
-
--- Grades for student005 (user_id = 10)
-INSERT INTO grades (student_id, subject_name, grade_value, grade_type, semester, school_year, teacher_id) VALUES
-(10, N'Toán', 8.0, N'midterm', N'HK1', N'2024-2025', 2),
-(10, N'Toán', 8.5, N'final', N'HK1', N'2024-2025', 2),
-(10, N'Văn', 9.0, N'midterm', N'HK1', N'2024-2025', 3),
-(10, N'Văn', 9.5, N'final', N'HK1', N'2024-2025', 3),
-(10, N'Anh', 8.5, N'midterm', N'HK1', N'2024-2025', 4),
-(10, N'Anh', 9.0, N'final', N'HK1', N'2024-2025', 4),
-(10, N'Lý', 7.5, N'midterm', N'HK1', N'2024-2025', 5),
-(10, N'Lý', 8.0, N'final', N'HK1', N'2024-2025', 5);
-
-GO
-
--- =====================================================
--- INSERT PERSONAL SCHEDULES
--- =====================================================
-
--- Schedules for teachers
+-- ===== 11. PERSONAL SCHEDULES (depends on users) =====
 INSERT INTO personal_schedules (user_id, title, description, schedule_date, start_time, end_time, schedule_type) VALUES
-(2, N'Dạy lớp 10A1', N'Chương trình Toán đại số', '2024-12-17', '07:30', '09:00', N'teaching'),
-(2, N'Họp tổ chuyên môn', N'Thảo luận kế hoạch giảng dạy HK2', '2024-12-18', '14:00', '16:00', N'meeting'),
-(3, N'Dạy lớp 10A2', N'Phân tích tác phẩm văn học', '2024-12-17', '09:15', '10:45', N'teaching'),
-(3, N'Chấm bài kiểm tra', N'Chấm bài kiểm tra 15 phút', '2024-12-19', '15:00', '17:00', N'personal'),
-(4, N'Dạy lớp 10A1', N'Tiếng Anh giao tiếp', '2024-12-17', '13:00', '14:30', N'teaching'),
-(5, N'Dạy lớp 10A3', N'Thí nghiệm Vật lý', '2024-12-18', '07:30', '09:00', N'teaching');
+-- Lịch của giáo viên
+(2, N'Họp khoa', N'Họp khoa về kế hoạch học kỳ mới', '2025-01-05', '08:00', '10:00', N'meeting'),
+(2, N'Chấm bài thi', N'Chấm bài thi giữa kỳ môn OOP', '2025-01-10', '13:00', '17:00', N'work'),
+(3, N'Hướng dẫn đồ án', N'Hướng dẫn đồ án cho nhóm sinh viên', '2025-01-08', '14:00', '16:00', N'teaching'),
+-- Lịch của học sinh
+(7, N'Ôn tập giữa kỳ', N'Ôn tập môn Lập trình hướng đối tượng', '2025-01-12', '19:00', '21:00', N'study'),
+(7, N'Làm bài tập nhóm', N'Họp nhóm làm project môn Database', '2025-01-15', '14:00', '17:00', N'group_work'),
+(8, N'Thể thao', N'Chơi bóng đá với bạn bè', '2025-01-13', '16:00', '18:00', N'personal'),
+(9, N'Học tiếng Anh', N'Lớp tiếng Anh ngoại khóa', '2025-01-14', '18:30', '20:30', N'study'),
+(13, N'Học thêm Toán', N'Lớp học thêm Toán', '2025-01-11', '18:00', '20:00', N'study'),
+(14, N'Thi Olympic Văn', N'Tham gia thi Olympic Văn cấp trường', '2025-01-20', '08:00', '11:00', N'exam');
 
--- Schedules for students
-INSERT INTO personal_schedules (user_id, title, description, schedule_date, start_time, end_time, schedule_type) VALUES
-(6, N'Ôn thi Toán', N'Ôn tập chương hàm số', '2024-12-17', '19:00', '21:00', N'study'),
-(6, N'Thi giữa kỳ Toán', N'Phòng thi A1', '2024-12-20', '08:00', '10:00', N'exam'),
-(7, N'Học nhóm môn Văn', N'Thảo luận đề thi', '2024-12-18', '15:00', '17:00', N'study'),
-(7, N'Thi giữa kỳ Văn', N'Phòng thi B2', '2024-12-21', '08:00', '10:00', N'exam'),
-(8, N'Luyện Olympic Toán', N'Giải đề thi năm trước', '2024-12-17', '16:00', '18:00', N'study'),
-(8, N'Thi giữa kỳ Anh', N'Phòng thi C1', '2024-12-22', '13:00', '15:00', N'exam'),
-(9, N'Học bù môn Lý', N'Học thêm với thầy', '2024-12-19', '14:00', '16:00', N'tutoring'),
-(10, N'Sinh nhật bạn', N'Dự tiệc sinh nhật', '2024-12-23', '18:00', '21:00', N'personal');
-
-GO
-
--- =====================================================
--- INSERT SOCIAL SETTINGS
--- =====================================================
-
+-- ===== 12. SOCIAL SETTINGS (depends on users) =====
 INSERT INTO social_settings (user_id, setting_key, setting_value, setting_type) VALUES
-(6, N'profile_visibility', N'public', N'privacy'),
-(6, N'show_grades', N'friends_only', N'privacy'),
-(6, N'allow_messages', N'true', N'communication'),
-(7, N'profile_visibility', N'friends_only', N'privacy'),
-(7, N'show_grades', N'private', N'privacy'),
-(8, N'profile_visibility', N'public', N'privacy'),
-(8, N'allow_comments', N'true', N'communication'),
-(9, N'profile_visibility', N'private', N'privacy'),
-(10, N'notification_enabled', N'true', N'notification');
+(7, N'profile_visibility', N'public', N'privacy'),
+(7, N'show_email', N'friends_only', N'privacy'),
+(7, N'allow_messages', N'everyone', N'privacy'),
+(8, N'profile_visibility', N'friends_only', N'privacy'),
+(8, N'show_email', N'private', N'privacy'),
+(9, N'profile_visibility', N'public', N'privacy'),
+(9, N'notification_posts', N'enabled', N'notification'),
+(9, N'notification_grades', N'enabled', N'notification');
 
-GO
-
--- =====================================================
--- INSERT LOGIN HISTORY
--- =====================================================
-
+-- ===== 13. LOGIN HISTORY (depends on users) =====
 INSERT INTO login_history (user_id, login_time, ip_address, user_agent, login_status) VALUES
-(1, '2024-12-16 08:00:00', N'192.168.1.100', N'Mozilla/5.0 (Windows NT 10.0)', N'success'),
-(2, '2024-12-16 07:30:00', N'192.168.1.101', N'Mozilla/5.0 (Windows NT 10.0)', N'success'),
-(3, '2024-12-16 08:15:00', N'192.168.1.102', N'Mozilla/5.0 (Macintosh)', N'success'),
-(6, '2024-12-16 06:45:00', N'192.168.1.150', N'Mozilla/5.0 (Android 12)', N'success'),
-(7, '2024-12-16 07:00:00', N'192.168.1.151', N'Mozilla/5.0 (iPhone)', N'success'),
-(8, '2024-12-16 07:20:00', N'192.168.1.152', N'Mozilla/5.0 (Android 13)', N'success'),
-(6, '2024-12-15 09:30:00', N'192.168.1.150', N'Mozilla/5.0 (Android 12)', N'failed'),
-(9, '2024-12-16 08:30:00', N'192.168.1.153', N'Mozilla/5.0 (iPhone)', N'success');
+(1, '2024-12-20 08:00:00', N'192.168.1.100', N'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', N'success'),
+(2, '2024-12-20 09:15:00', N'192.168.1.101', N'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', N'success'),
+(7, '2024-12-20 10:30:00', N'192.168.1.102', N'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0)', N'success'),
+(8, '2024-12-20 11:00:00', N'192.168.1.103', N'Mozilla/5.0 (Android 11; Mobile)', N'success'),
+(7, '2024-12-20 14:20:00', N'192.168.1.102', N'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0)', N'success'),
+(9, '2024-12-20 15:45:00', N'192.168.1.104', N'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', N'success'),
+(8, '2024-12-20 16:00:00', N'192.168.1.103', N'Mozilla/5.0 (Android 11; Mobile)', N'failed'),
+(8, '2024-12-20 16:05:00', N'192.168.1.103', N'Mozilla/5.0 (Android 11; Mobile)', N'success');
 
-GO
-
--- =====================================================
--- INSERT PASSWORD RESET TOKENS (for testing)
--- =====================================================
-
+-- ===== 14. PASSWORD RESETS (depends on users) =====
 INSERT INTO password_resets (user_id, reset_token, expires_at, used) VALUES
-(6, N'abc123def456', DATEADD(hour, 24, GETDATE()), 0),
-(7, N'xyz789uvw012', DATEADD(hour, 24, GETDATE()), 0);
+(7, N'token_abc123xyz', DATEADD(hour, 24, GETDATE()), 0),
+(8, N'token_def456uvw', DATEADD(hour, -2, GETDATE()), 1),
+(9, N'token_ghi789rst', DATEADD(hour, 12, GETDATE()), 0);
 
 GO

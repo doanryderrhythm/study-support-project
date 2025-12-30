@@ -37,6 +37,7 @@ public class StudentGradesEditActivity extends AppCompatActivity {
     private int currentUserId;
     private ImageView ivProfilePicture;
     private TextView tvProfileName;
+    private boolean isTeacherMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,14 @@ public class StudentGradesEditActivity extends AppCompatActivity {
         semesterName = getIntent().getStringExtra("semester_name");
         className = getIntent().getStringExtra("class_name");
         classId = getIntent().getIntExtra("class_id", -1);
+        isTeacherMode = getIntent().getBooleanExtra("is_teacher_mode", true);
+
+        // Block access if opened from admin panel
+        if (!isTeacherMode) {
+            Toast.makeText(this, "Admins cannot edit grades. Only teachers can edit grades.", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
 
         // Setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);

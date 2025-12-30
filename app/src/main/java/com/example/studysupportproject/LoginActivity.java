@@ -143,6 +143,7 @@ public class LoginActivity extends AppCompatActivity {
                                 SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
                                 SharedPreferences.Editor editor = prefs.edit();
                                 editor.putInt("user_id", user.getId());
+                                editor.putString("role", user.getRole());
                                 editor.apply();
 
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);

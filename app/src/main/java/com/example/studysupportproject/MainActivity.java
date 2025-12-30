@@ -80,19 +80,17 @@ public class MainActivity extends AppCompatActivity {
         currentUserId = getSharedPreferences("UserPrefs", MODE_PRIVATE)
                 .getInt("user_id", -1);
 
-        // Get user role from database
-        new Thread(() -> {
-            User currentUser = dbHelper.getUserById(currentUserId);
-            userRole = currentUser != null ? currentUser.getRole() : "student";
-            Log.d("MainActivity", "User role from database: " + userRole);
-            
-            // Update SharedPrefManager with role if not already set
-            User savedUser = SharedPrefManager.getInstance(MainActivity.this).getUser();
-            if (savedUser != null && (savedUser.getRole() == null || savedUser.getRole().isEmpty())) {
-                savedUser.setRole(userRole);
-                SharedPrefManager.getInstance(MainActivity.this).userLogin(savedUser);
-            }
-        }).start();
+        // Get user role from SharedPrefManager
+        User currentUser = SharedPrefManager.getInstance(this).getUser();
+        userRole = currentUser != null ? currentUser.getRole() : "student";
+        Log.d("MainActivity", "User role from SharedPref: " + userRole);
+
+        // Show admin panel if user is admin
+        if (userRole != null && userRole.equals("admin")) {
+            navView.getMenu().findItem(R.id.menu_admin_panel).setVisible(true);
+        } else {
+            navView.getMenu().findItem(R.id.menu_admin_panel).setVisible(false);
+        }
 
         navPost = findViewById(R.id.nav_post);
         navStudy = findViewById(R.id.nav_study);
@@ -275,9 +273,10 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Unknown user role", Toast.LENGTH_SHORT).show();
                     }
                     drawerLayout.closeDrawer(GravityCompat.END);
-                } else if (itemId == R.id.menu_profile) {
-                    Toast.makeText(MainActivity.this, "Profile", Toast.LENGTH_SHORT).show();
-                    // TODO: Implement profile activity
+                } else if (itemId == R.id.menu_admin_panel) {
+                    Intent intent = new Intent(MainActivity.this, SchoolListActivity.class);
+                    startActivity(intent);
+                    drawerLayout.closeDrawer(GravityCompat.END);
                 } else if (itemId == R.id.menu_account) {
                     Intent intent = new Intent(MainActivity.this, AccountMenuActivity.class);
                     startActivity(intent);
