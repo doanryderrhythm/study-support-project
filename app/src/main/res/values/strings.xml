@@ -2,6 +2,8 @@
     <string name="app_name">StudySupportProject</string>
     <string name="no_post_available">Không có bài viết nào.</string>
     <string name="student_grades">Student Grades</string>
+    <string name="add_subject">Add Subject</string>
+    <string name="delete_subject">Delete Subject</string>
 
     <string-array name="schedule_types">
         <item>personal</item>

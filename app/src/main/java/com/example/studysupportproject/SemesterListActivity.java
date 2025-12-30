@@ -5,6 +5,7 @@ import static android.view.View.GONE;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -81,6 +82,17 @@ public class SemesterListActivity extends AppCompatActivity implements SemesterA
             intent.putExtra("school_id", schoolId);
             startActivityForResult(intent, 100);
         });
+
+        // Setup Manage Subjects button
+        Button btnManageSubjects = findViewById(R.id.btn_manage_subjects);
+        if (btnManageSubjects != null) {
+            btnManageSubjects.setOnClickListener(v -> {
+                Intent intent = new Intent(SemesterListActivity.this, SubjectListActivity.class);
+                intent.putExtra("school_id", schoolId);
+                intent.putExtra("school_name", schoolName);
+                startActivity(intent);
+            });
+        }
 
         loadSemesters();
     }

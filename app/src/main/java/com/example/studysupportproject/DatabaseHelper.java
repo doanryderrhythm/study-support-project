@@ -2114,4 +2114,137 @@ public class DatabaseHelper {
         }
         return classes;
     }
+
+    /**
+     * Add a new subject
+     */
+    public boolean addSubject(String subjectName, int schoolId) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        boolean success = false;
+
+        try {
+            con = getConnection();
+            if (con == null) {
+                Log.e(TAG, "Connection is null in addSubject");
+                return false;
+            }
+
+            String query = "INSERT INTO subjects (subject_name, school_id) VALUES (?, ?)";
+            stmt = con.prepareStatement(query);
+            stmt.setString(1, subjectName);
+            stmt.setInt(2, schoolId);
+
+            int rowsAffected = stmt.executeUpdate();
+            success = rowsAffected > 0;
+
+            if (success) {
+                Log.i(TAG, "Subject '" + subjectName + "' added successfully for school " + schoolId);
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error adding subject: " + e.getMessage());
+        } finally {
+            closeResources(null, stmt, con);
+        }
+        return success;
+    }
+
+    /**
+     * Delete a subject by ID
+     */
+    public boolean deleteSubject(int subjectId) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        boolean success = false;
+
+        try {
+            con = getConnection();
+            if (con == null) {
+                Log.e(TAG, "Connection is null in deleteSubject");
+                return false;
+            }
+
+            String query = "DELETE FROM subjects WHERE id = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, subjectId);
+
+            int rowsAffected = stmt.executeUpdate();
+            success = rowsAffected > 0;
+
+            if (success) {
+                Log.i(TAG, "Subject " + subjectId + " deleted successfully");
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error deleting subject: " + e.getMessage());
+        } finally {
+            closeResources(null, stmt, con);
+        }
+        return success;
+    }
+
+    public boolean updateSubject(Subject subject) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        boolean success = false;
+
+        try {
+            con = getConnection();
+            if (con == null) {
+                Log.e(TAG, "Connection is null in updateSubject");
+                return false;
+            }
+
+            String query = "UPDATE subjects SET subject_name = ? WHERE id = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setString(1, subject.getName());
+            stmt.setInt(2, subject.getId());
+
+            int rowsAffected = stmt.executeUpdate();
+            success = rowsAffected > 0;
+
+            if (success) {
+                Log.i(TAG, "Subject " + subject.getId() + " updated successfully");
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error updating subject: " + e.getMessage());
+        } finally {
+            closeResources(null, stmt, con);
+        }
+        return success;
+    }
+
+    /**
+     * Check if a subject has any classes attached to it
+     */
+    public boolean hasClassesAttached(int subjectId) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        boolean hasClasses = false;
+
+        try {
+            con = getConnection();
+            if (con == null) {
+                Log.e(TAG, "Connection is null in hasClassesAttached");
+                return false;
+            }
+
+            String query = "SELECT COUNT(*) as count FROM class_subjects WHERE subject_id = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, subjectId);
+
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt("count");
+                hasClasses = count > 0;
+            }
+
+            Log.i(TAG, "Subject " + subjectId + " has " + (hasClasses ? "attached classes" : "no attached classes"));
+        } catch (SQLException e) {
+            Log.e(TAG, "Error checking attached classes: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+        return hasClasses;
+    }
 }
