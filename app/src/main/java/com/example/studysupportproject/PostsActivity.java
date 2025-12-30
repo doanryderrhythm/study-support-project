@@ -79,9 +79,15 @@ public class PostsActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        loadPosts();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 100 && resultCode == RESULT_OK) {
+        if ((requestCode == 100 || requestCode == 50) && resultCode == RESULT_OK) {
             loadPosts();
         }
     }
