@@ -35,7 +35,7 @@ public class StudentListAdapter extends RecyclerView.Adapter<StudentListAdapter.
     public void onBindViewHolder(@NonNull StudentViewHolder holder, int position) {
         User student = students.get(position);
         holder.tvStudentName.setText(student.getFullName());
-        holder.tvStudentId.setText("ID: " + student.getId());
+        //holder.tvStudentId.setText("ID: " + student.getId());
         holder.tvStudentUsername.setText(student.getUsername());
 
         holder.itemView.setOnClickListener(v -> onStudentClickListener.onStudentClick(student));
@@ -54,7 +54,7 @@ public class StudentListAdapter extends RecyclerView.Adapter<StudentListAdapter.
         public StudentViewHolder(@NonNull View itemView) {
             super(itemView);
             tvStudentName = itemView.findViewById(R.id.tv_student_name);
-            tvStudentId = itemView.findViewById(R.id.tv_student_id);
+            //tvStudentId = itemView.findViewById(R.id.tv_student_id);
             tvStudentUsername = itemView.findViewById(R.id.tv_student_username);
         }
     }
