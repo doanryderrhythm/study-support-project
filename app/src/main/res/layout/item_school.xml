@@ -13,14 +13,51 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/tv_school_name"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="School Name"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#212121" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_school_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="School Name"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#212121" />
+
+            <LinearLayout
+                android:id="@+id/admin_actions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:gravity="center_vertical">
+
+                <ImageButton
+                    android:id="@+id/btn_edit_school"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@android:drawable/ic_menu_edit"
+                    android:contentDescription="Edit School"
+                    android:scaleType="centerInside"
+                    android:padding="6dp"
+                    android:background="?attr/selectableItemBackgroundBorderless" />
+
+                <ImageButton
+                    android:id="@+id/btn_delete_school"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_delete"
+                    android:contentDescription="Delete School"
+                    android:scaleType="centerInside"
+                    android:padding="6dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

@@ -122,25 +122,35 @@ public class SemesterListActivity extends AppCompatActivity implements SemesterA
 
     @Override
     public void onDeleteSemester(Semester semester) {
-        // Show confirmation dialog
-        new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("Delete Semester")
-                .setMessage("Are you sure you want to delete this semester?")
-                .setPositiveButton("Delete", (dialog, which) -> {
-                    new Thread(() -> {
-                        try {
-                            dbHelper.deleteSemester(semester.getId());
-                            runOnUiThread(() -> {
-                                Toast.makeText(SemesterListActivity.this, "Semester deleted", Toast.LENGTH_SHORT).show();
-                                loadSemesters();
-                            });
-                        } catch (Exception e) {
-                            runOnUiThread(() -> Toast.makeText(SemesterListActivity.this, "Error deleting semester: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                        }
-                    }).start();
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+        // Check if semester has classes attached
+        new Thread(() -> {
+            boolean hasClasses = dbHelper.hasClassesInSemester(semester.getId());
+            runOnUiThread(() -> {
+                if (hasClasses) {
+                    Toast.makeText(SemesterListActivity.this, "Cannot delete semester - classes are still attached", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Show confirmation dialog
+                    new androidx.appcompat.app.AlertDialog.Builder(this)
+                            .setTitle("Delete Semester")
+                            .setMessage("Are you sure you want to delete this semester?")
+                            .setPositiveButton("Delete", (dialog, which) -> {
+                                new Thread(() -> {
+                                    try {
+                                        dbHelper.deleteSemester(semester.getId());
+                                        runOnUiThread(() -> {
+                                            Toast.makeText(SemesterListActivity.this, "Semester deleted", Toast.LENGTH_SHORT).show();
+                                            loadSemesters();
+                                        });
+                                    } catch (Exception e) {
+                                        runOnUiThread(() -> Toast.makeText(SemesterListActivity.this, "Error deleting semester: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                    }
+                                }).start();
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .show();
+                }
+            });
+        }).start();
     }
 
 

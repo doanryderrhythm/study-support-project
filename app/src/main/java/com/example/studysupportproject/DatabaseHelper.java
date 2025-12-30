@@ -1517,6 +1517,39 @@ public class DatabaseHelper {
     /**
      * Delete a semester by ID (cascades to delete all classes and their relationships)
      */
+    /**
+     * Check if semester has any classes attached
+     */
+    public boolean hasClassesInSemester(int semesterId) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int count = 0;
+
+        try {
+            con = getConnection();
+            if (con == null) {
+                Log.e(TAG, "Connection is null in hasClassesInSemester");
+                return false;
+            }
+
+            String query = "SELECT COUNT(*) as count FROM classes WHERE semester_id = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, semesterId);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                count = rs.getInt("count");
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error checking classes in semester: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+
+        return count > 0;
+    }
+
     public boolean deleteSemester(int semesterId) {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -2246,5 +2279,72 @@ public class DatabaseHelper {
             closeResources(rs, stmt, con);
         }
         return hasClasses;
+    }
+
+    // ---------------------- SCHOOLS TABLE METHODS ----------------------
+
+    /**
+     * Check if a school has any semesters attached to it
+     */
+    public boolean hasSemestersAttached(int schoolId) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        boolean hasSemesters = false;
+
+        try {
+            con = getConnection();
+            if (con == null) {
+                Log.e(TAG, "Connection is null in hasSemestersAttached");
+                return false;
+            }
+
+            String query = "SELECT COUNT(*) as count FROM school_semesters WHERE school_id = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, schoolId);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int count = rs.getInt("count");
+                hasSemesters = count > 0;
+            }
+
+            Log.i(TAG, "School " + schoolId + " has " + (hasSemesters ? "attached semesters" : "no attached semesters"));
+        } catch (SQLException e) {
+            Log.e(TAG, "Error checking attached semesters: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, con);
+        }
+        return hasSemesters;
+    }
+
+    /**
+     * Delete a school by ID
+     */
+    public boolean deleteSchool(int schoolId) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        boolean success = false;
+
+        try {
+            con = getConnection();
+            if (con == null) {
+                Log.e(TAG, "Connection is null in deleteSchool");
+                return false;
+            }
+
+            String query = "DELETE FROM schools WHERE id = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, schoolId);
+            int rowsAffected = stmt.executeUpdate();
+
+            success = rowsAffected > 0;
+            Log.i(TAG, "School " + schoolId + " deleted successfully. Rows affected: " + rowsAffected);
+        } catch (SQLException e) {
+            Log.e(TAG, "Error deleting school: " + e.getMessage());
+        } finally {
+            closeResources(null, stmt, con);
+        }
+        return success;
     }
 }

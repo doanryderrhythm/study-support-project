@@ -29,7 +29,7 @@ public class ClassDetailActivity extends AppCompatActivity {
     private Button btnManageTeachers;
     private Button btnSave;
     private Button btnCancel;
-    private FloatingActionButton fabDeleteClass;
+    //private FloatingActionButton fabDeleteClass;
     private ImageButton menuButton;
 
     private DatabaseHelper dbHelper;
@@ -64,6 +64,7 @@ public class ClassDetailActivity extends AppCompatActivity {
             }
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+        menuButton = findViewById(R.id.menu_button);
         menuButton.setVisibility(GONE);
 
         // Setup views
@@ -73,7 +74,7 @@ public class ClassDetailActivity extends AppCompatActivity {
         btnManageTeachers = findViewById(R.id.btn_manage_teachers);
         btnSave = findViewById(R.id.btn_save);
         btnCancel = findViewById(R.id.btn_cancel);
-        fabDeleteClass = findViewById(R.id.fab_delete_class);
+        //fabDeleteClass = findViewById(R.id.fab_delete_class);
 
         // Load subjects and setup spinner
         subjects = new ArrayList<>();
@@ -103,12 +104,12 @@ public class ClassDetailActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(v -> onBackPressed());
 
         // Delete button (only show if editing existing class)
-        if (classId != -1) {
-            fabDeleteClass.setVisibility(View.VISIBLE);
-            fabDeleteClass.setOnClickListener(v -> deleteClass());
-        } else {
-            fabDeleteClass.setVisibility(GONE);
-        }
+//        if (classId != -1) {
+//            fabDeleteClass.setVisibility(View.VISIBLE);
+//            fabDeleteClass.setOnClickListener(v -> deleteClass());
+//        } else {
+//            fabDeleteClass.setVisibility(GONE);
+//        }
 
         // Load class data if editing
         if (classId != -1) {

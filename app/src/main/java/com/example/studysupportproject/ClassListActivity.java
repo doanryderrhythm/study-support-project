@@ -196,19 +196,24 @@ public class ClassListActivity extends AppCompatActivity implements ClassListAda
                 runOnUiThread(() -> {
                     if (classes.isEmpty()) {
                         Toast.makeText(ClassListActivity.this, "No classes found", Toast.LENGTH_SHORT).show();
+                        if (classListAdapter != null) {
+                            classListAdapter.setClasses(new ArrayList<>());
+                        }
                     } else {
-                        classListAdapter = new ClassListAdapter(ClassListActivity.this);
+                        if (classListAdapter == null) {
+                            classListAdapter = new ClassListAdapter(ClassListActivity.this);
+                            classListAdapter.setOnClassClickListener(classItem -> {
+                                Intent intent = new Intent(ClassListActivity.this, StudentGradesEditActivity.class);
+                                intent.putExtra("semester_name", semesterName);
+                                intent.putExtra("class_name", classItem.getClassName());
+                                intent.putExtra("class_id", classItem.getId());
+                                intent.putExtra("is_teacher_mode", isTeacherMode);
+                                startActivity(intent);
+                            });
+                            classListAdapter.setOnClassActionListener(ClassListActivity.this);
+                            classRecyclerView.setAdapter(classListAdapter);
+                        }
                         classListAdapter.setClasses(classes);
-                        classListAdapter.setOnClassClickListener(classItem -> {
-                            Intent intent = new Intent(ClassListActivity.this, StudentGradesEditActivity.class);
-                            intent.putExtra("semester_name", semesterName);
-                            intent.putExtra("class_name", classItem.getClassName());
-                            intent.putExtra("class_id", classItem.getId());
-                            intent.putExtra("is_teacher_mode", isTeacherMode);
-                            startActivity(intent);
-                        });
-                        classListAdapter.setOnClassActionListener(ClassListActivity.this);
-                        classRecyclerView.setAdapter(classListAdapter);
                     }
                 });
             } catch (Exception e) {
