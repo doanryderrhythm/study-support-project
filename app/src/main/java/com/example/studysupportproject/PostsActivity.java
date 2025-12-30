@@ -87,6 +87,7 @@ public class PostsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadPosts();
+        setupNavigationViewMenu();
     }
 
     @Override

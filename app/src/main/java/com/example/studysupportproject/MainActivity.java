@@ -119,6 +119,12 @@ public class MainActivity extends AppCompatActivity {
         loadSchedules();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupNavigationViewMenu();
+    }
+
     private void loadUserProfile() {
         if (currentUserId == -1) {
             tvProfileName.setText("Khách");

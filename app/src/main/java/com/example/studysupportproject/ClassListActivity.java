@@ -68,6 +68,12 @@ public class ClassListActivity extends AppCompatActivity {
         loadClassesForSemester();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupNavigationViewMenu();
+    }
+
     private void setupMenuButton() {
         menuButton.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.END));
     }

@@ -72,6 +72,12 @@ public class StudentGradesEditActivity extends AppCompatActivity {
         loadStudentsInClass();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupNavigationViewMenu();
+    }
+
     private void setupMenuButton() {
         menuButton.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.END));
     }

@@ -68,6 +68,12 @@ public class StudentGradesActivity extends AppCompatActivity {
         setupNavigationViewMenu();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupNavigationViewMenu();
+    }
+
     private void initializeViews() {
         gradesRecyclerView = findViewById(R.id.grades_recycler_view);
         gradesRecyclerView.setLayoutManager(new LinearLayoutManager(this));

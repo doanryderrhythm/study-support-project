@@ -653,6 +653,37 @@ public class DatabaseHelper {
     }
 
     /**
+     * Cập nhật avatar của user
+     */
+    public boolean updateUserAvatar(int userId, String avatarUrl) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        boolean success = false;
+
+        try {
+            con = conSQL.conclass();
+            if (con == null) return false;
+
+            String query = "UPDATE users SET avatar = ?, updated_at = GETDATE() WHERE id = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setString(1, avatarUrl);
+            stmt.setInt(2, userId);
+
+            int rowsAffected = stmt.executeUpdate();
+            success = rowsAffected > 0;
+
+            if (success) {
+                Log.i(TAG, "Avatar updated successfully for user: " + userId);
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error updating avatar: " + e.getMessage());
+        } finally {
+            closeResources(null, stmt, con);
+        }
+        return success;
+    }
+
+    /**
      * Lấy tất cả comments của một post
      */
     public List<Comment> getCommentsByPostId(int postId) {

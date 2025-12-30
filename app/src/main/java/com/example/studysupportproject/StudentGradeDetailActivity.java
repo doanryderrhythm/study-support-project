@@ -104,6 +104,12 @@ public class StudentGradeDetailActivity extends AppCompatActivity {
         loadStudentGrades();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupNavigationViewMenu();
+    }
+
     private void initializeGradeFields() {
         try {
             // Grade input fields
