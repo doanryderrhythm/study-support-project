@@ -47,8 +47,8 @@ public class DatabaseHelper {
             }
 
             // Lấy class_id mặc định (giả sử class_id = 1, role_id = 3)
-            String query = "INSERT INTO users (username, email, password, class_id, role_id, full_name, phone, date_of_birth, address) " +
-                    "VALUES (?, ?, ?, 1, 3, ?, ?, ?, ?); SELECT SCOPE_IDENTITY() as id";
+            String query = "INSERT INTO users (username, email, password, role_id, full_name, phone, date_of_birth, address) " +
+                    "VALUES (?, ?, ?, 3, ?, ?, ?, ?); SELECT SCOPE_IDENTITY() as id";
 
             stmt = con.prepareStatement(query);
             stmt.setString(1, username);

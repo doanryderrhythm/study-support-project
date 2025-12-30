@@ -6,7 +6,7 @@ GO
 EXEC sys.sp_msforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT ALL'
 EXEC sys.sp_msforeachtable 'DELETE FROM ?'
 EXEC sys.sp_MSForEachTable 'ALTER TABLE ? CHECK CONSTRAINT ALL'
-EXEC sys.sp_MSForEachTable 'IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(''?'')) DBCC CHECKIDENT (''?'', RESEED, 1);'
+EXEC sys.sp_MSForEachTable 'DECLARE @identValue BIGINT; IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(''?'')) BEGIN SET @identValue = IDENT_CURRENT(''?''); IF @identValue > 0 DBCC CHECKIDENT (''?'', RESEED, 0); ELSE DBCC CHECKIDENT (''?'', RESEED, 1); END'
 
 -- INSERT ORDER (respecting FK constraints):
 -- 1. Roles and Permissions (no dependencies)
