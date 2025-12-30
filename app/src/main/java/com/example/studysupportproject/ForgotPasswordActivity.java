@@ -2,6 +2,7 @@ package com.example.studysupportproject;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -103,6 +104,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
                                 // Hiển thị OTP trong log cho mục đích demo
                                 // (ĐÃ XÓA BuildConfig.DEBUG để tránh lỗi)
+                                Log.d("otp", otp);
 
                                 // Chuyển sang màn hình xác thực OTP
                                 Intent intent = new Intent(ForgotPasswordActivity.this, OtpVerificationActivity.class);
