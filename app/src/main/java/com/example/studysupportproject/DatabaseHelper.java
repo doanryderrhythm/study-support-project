@@ -1725,7 +1725,10 @@ public class DatabaseHelper {
             con = getConnection();
             if (con == null) return students;
 
-            String query = "SELECT * FROM users WHERE id NOT IN (SELECT student_id FROM class_students WHERE class_id = ?) ORDER BY full_name ASC";
+            String query = "SELECT u.* FROM users u " +
+                    "WHERE u.role_id IN (SELECT id FROM roles WHERE role_name = 'student') " +
+                    "AND u.id NOT IN (SELECT student_id FROM class_students WHERE class_id = ?) " +
+                    "ORDER BY u.full_name ASC";
             stmt = con.prepareStatement(query);
             stmt.setInt(1, classId);
             rs = stmt.executeQuery();
@@ -1863,7 +1866,7 @@ public class DatabaseHelper {
             if (con == null) return teachers;
 
             String query = "SELECT u.id, u.username, u.email, u.full_name, u.phone FROM users u " +
-                    "WHERE u.role_id IN (SELECT id FROM roles WHERE role_name IN ('teacher', 'admin')) " +
+                    "WHERE u.role_id IN (SELECT id FROM roles WHERE role_name = 'teacher') " +
                     "AND u.id NOT IN (SELECT teacher_id FROM class_teachers WHERE class_id = ?) " +
                     "ORDER BY u.full_name ASC";
             stmt = con.prepareStatement(query);
