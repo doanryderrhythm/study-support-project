@@ -1,5 +1,7 @@
 package com.example.studysupportproject;
 
+import static android.view.View.GONE;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -16,25 +18,30 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClassListActivity extends AppCompatActivity {
+public class ClassListActivity extends AppCompatActivity implements ClassListAdapter.OnClassActionListener {
     private RecyclerView classRecyclerView;
-    private ClassAdapter classAdapter;
+    private ClassListAdapter classListAdapter;
     private DrawerLayout drawerLayout;
     private ImageButton menuButton;
     private NavigationView navView;
+    private FloatingActionButton fabAddClass;
     private ConSQL conSQL;
     private String semesterName;
     private int semesterId;
 
-    private DatabaseHelper dbHelper;
     private int currentUserId;
     private ImageView ivProfilePicture;
     private TextView tvProfileName;
+    private int schoolId;
+    private DatabaseHelper dbHelper;
+    private boolean isTeacherMode;
+    private int teacherId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +50,12 @@ public class ClassListActivity extends AppCompatActivity {
 
         semesterId = getIntent().getIntExtra("semester_id", -1);
         semesterName = getIntent().getStringExtra("semester_name");
+        schoolId = getIntent().getIntExtra("school_id", -1);
+        isTeacherMode = getIntent().getBooleanExtra("is_teacher_mode", false);
+
+
+
+        dbHelper = new DatabaseHelper();
 
         // Setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -56,10 +69,29 @@ public class ClassListActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawer_layout);
         menuButton = findViewById(R.id.menu_button);
         navView = findViewById(R.id.nav_view);
+        if (isTeacherMode) {
+            teacherId = SharedPrefManager.getInstance(this).getUser().getId();
+            menuButton.setVisibility(GONE);
+        }
 
         // Setup RecyclerView
         classRecyclerView = findViewById(R.id.class_recycler_view);
         classRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Setup FAB - only visible if entered from SemesterListActivity (which passes school_id) and not in teacher mode
+        fabAddClass = findViewById(R.id.fab_add_class);
+        if (schoolId != -1 && !isTeacherMode) {
+            fabAddClass.setVisibility(View.VISIBLE);
+            fabAddClass.setOnClickListener(v -> {
+                Intent intent = new Intent(ClassListActivity.this, ClassDetailActivity.class);
+                intent.putExtra("class_id", -1); // new class
+                intent.putExtra("semester_id", semesterId);
+                intent.putExtra("school_id", schoolId);
+                startActivityForResult(intent, 100);
+            });
+        } else {
+            fabAddClass.setVisibility(GONE);
+        }
 
         conSQL = new ConSQL();
 
@@ -151,45 +183,86 @@ public class ClassListActivity extends AppCompatActivity {
     private void loadClassesForSemester() {
         new Thread(() -> {
             try {
-                int teacherId = SharedPrefManager.getInstance(this).getUser().getId();
-
-                String query = "SELECT c.id, c.class_name " +
-                        "FROM classes c " +
-                        "INNER JOIN class_teachers ct ON c.id = ct.class_id " +
-                        "WHERE ct.teacher_id = " + teacherId + " " +
-                        "AND c.semester_id = " + semesterId + " " +
-                        "ORDER BY c.class_name";
-
-                java.util.List<java.util.Map<String, String>> results = conSQL.executeQuery(query);
-                java.util.List<java.util.Map<String, Object>> classesWithIds = new java.util.ArrayList<>();
-
-                if (results != null) {
-                    for (java.util.Map<String, String> row : results) {
-                        java.util.Map<String, Object> classItem = new java.util.HashMap<>();
-                        classItem.put("id", Integer.parseInt(row.getOrDefault("id", "0")));
-                        classItem.put("name", row.getOrDefault("class_name", "Unknown"));
-                        classesWithIds.add(classItem);
-                    }
+                List<ClassItem> classes;
+                
+                if (isTeacherMode) {
+                    // Load only classes assigned to this teacher
+                    classes = dbHelper.getTeacherClassesBySemester(semesterId, teacherId);
+                } else {
+                    // Load all classes in the semester
+                    classes = dbHelper.getClassesBySemester(semesterId);
                 }
-
+                
                 runOnUiThread(() -> {
-                    if (classesWithIds.isEmpty()) {
+                    if (classes.isEmpty()) {
                         Toast.makeText(ClassListActivity.this, "No classes found", Toast.LENGTH_SHORT).show();
                     } else {
-                        classAdapter = new ClassAdapter(classesWithIds, classItem -> {
+                        classListAdapter = new ClassListAdapter(ClassListActivity.this);
+                        classListAdapter.setClasses(classes);
+                        classListAdapter.setOnClassClickListener(classItem -> {
                             Intent intent = new Intent(ClassListActivity.this, StudentGradesEditActivity.class);
                             intent.putExtra("semester_name", semesterName);
-                            intent.putExtra("class_name", (String) classItem.get("name"));
-                            intent.putExtra("class_id", (int) classItem.get("id"));
+                            intent.putExtra("class_name", classItem.getClassName());
+                            intent.putExtra("class_id", classItem.getId());
+                            intent.putExtra("is_teacher_mode", isTeacherMode);
                             startActivity(intent);
                         });
-                        classRecyclerView.setAdapter(classAdapter);
+                        classListAdapter.setOnClassActionListener(ClassListActivity.this);
+                        classRecyclerView.setAdapter(classListAdapter);
                     }
                 });
             } catch (Exception e) {
-                Toast.makeText(ClassListActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                runOnUiThread(() -> Toast.makeText(ClassListActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
         }).start();
+    }
+
+    @Override
+    public void onEditClass(ClassItem classItem) {
+        if (isTeacherMode) {
+            Toast.makeText(this, "Teachers cannot edit classes", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(ClassListActivity.this, ClassDetailActivity.class);
+        intent.putExtra("class_id", classItem.getId());
+        intent.putExtra("semester_id", semesterId);
+        intent.putExtra("school_id", schoolId);
+        startActivityForResult(intent, 100);
+    }
+
+    @Override
+    public void onDeleteClass(ClassItem classItem) {
+        if (isTeacherMode) {
+            Toast.makeText(this, "Teachers cannot delete classes", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // Show confirmation dialog
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Delete Class")
+                .setMessage("Are you sure you want to delete this class?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    new Thread(() -> {
+                        try {
+                            dbHelper.deleteClass(classItem.getId());
+                            runOnUiThread(() -> {
+                                Toast.makeText(ClassListActivity.this, "Class deleted", Toast.LENGTH_SHORT).show();
+                                loadClassesForSemester();
+                            });
+                        } catch (Exception e) {
+                            runOnUiThread(() -> Toast.makeText(ClassListActivity.this, "Error deleting class: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        }
+                    }).start();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            loadClassesForSemester();
+        }
     }
 
     @Override

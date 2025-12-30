@@ -13,11 +13,6 @@
         android:icon="@drawable/ic_study"
         android:title="Study" />
     <item
-        android:id="@+id/menu_profile"
-        android:icon="@drawable/ic_profile"
-        android:title="Profile"
-        android:visible="false"/>
-    <item
         android:id="@+id/menu_account"
         android:icon="@drawable/ic_account"
         android:title="Account" />
@@ -25,5 +20,10 @@
         android:id="@+id/menu_logout"
         android:icon="@drawable/baseline_logout_24"
         android:title="Logout" />
+    <item
+        android:id="@+id/menu_admin_panel"
+        android:icon="@drawable/ic_admin_panel"
+        android:title="Admin Panel"
+        android:visible="false"/>
 </menu>
 

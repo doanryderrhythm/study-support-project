@@ -25,27 +25,45 @@ public class ConSQL {
         StrictMode.ThreadPolicy a = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(a);
         String ConnectURL = null;
-        try
-        {
-            Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            // Add connection timeout to avoid long waits
-            ConnectURL = "jdbc:jtds:sqlserver://" + ip + ":" + port +
-                    ";databasename=" + db +
-                    ";user=" + username +
-                    ";password=" + password +
-                    ";loginTimeout=10";
-            con = DriverManager.getConnection(ConnectURL);
+        int maxRetries = 2;
+        int retryCount = 0;
+        
+        while (retryCount < maxRetries) {
+            try {
+                Class.forName("net.sourceforge.jtds.jdbc.Driver");
+                // Add connection timeout to avoid long waits
+                ConnectURL = "jdbc:jtds:sqlserver://" + ip + ":" + port +
+                        ";databasename=" + db +
+                        ";user=" + username +
+                        ";password=" + password +
+                        ";loginTimeout=10;socketTimeout=10000";
+                        
+                con = DriverManager.getConnection(ConnectURL);
 
-            if (con != null) {
-                Log.i(TAG, "CONNECTION SUCCESSFUL");
-                Log.i(TAG, "Connected to: " + db);
-            } else {
-                Log.e(TAG, "CONNECTION RETURNED NULL");
+                if (con != null && !con.isClosed()) {
+                    Log.i(TAG, "CONNECTION SUCCESSFUL");
+                    Log.i(TAG, "Connected to: " + db);
+                    return con;
+                } else {
+                    Log.e(TAG, "CONNECTION RETURNED NULL or CLOSED");
+                    con = null;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Connection attempt " + (retryCount + 1) + " failed: " + e.getMessage());
+                con = null;
+                retryCount++;
+                if (retryCount < maxRetries) {
+                    try {
+                        Thread.sleep(500); // Wait 500ms before retrying
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             }
-        } catch (Exception e) {
-            Log.e("Error", e.getMessage());
         }
-        return con;
+        
+        Log.e(TAG, "Failed to establish connection after " + maxRetries + " attempts");
+        return null;
     }
 
     /**

@@ -157,7 +157,6 @@ public class GradeManagementActivity extends AppCompatActivity {
                         "ORDER BY s.semester_name";
 
                 semesterList = new ArrayList<>();
-                List<String> semesterNames = new ArrayList<>();
                 List<java.util.Map<String, String>> results = conSQL.executeQuery(query);
 
                 if (results != null) {
@@ -165,28 +164,22 @@ public class GradeManagementActivity extends AppCompatActivity {
                         int semesterId = Integer.parseInt(row.getOrDefault("id", "0"));
                         String semesterName = row.getOrDefault("semester_name", "Unknown");
                         semesterList.add(new Semester(semesterId, semesterName));
-                        semesterNames.add(semesterName);
                     }
                 }
 
                 runOnUiThread(() -> {
-                    if (semesterNames.isEmpty()) {
+                    if (semesterList.isEmpty()) {
                         Toast.makeText(GradeManagementActivity.this, "No semesters found", Toast.LENGTH_SHORT).show();
                     } else {
-                        semesterAdapter = new SemesterAdapter(semesterNames, semesterName -> {
-                            // Find semester id by name
-                            int semesterId = 0;
-                            for (Semester s : semesterList) {
-                                if (s.getName().equals(semesterName)) {
-                                    semesterId = s.getId();
-                                    break;
-                                }
-                            }
+                        semesterAdapter = new SemesterAdapter(GradeManagementActivity.this);
+                        semesterAdapter.setOnSemesterClickListener(semester -> {
                             Intent intent = new Intent(GradeManagementActivity.this, ClassListActivity.class);
-                            intent.putExtra("semester_id", semesterId);
-                            intent.putExtra("semester_name", semesterName);
+                            intent.putExtra("semester_id", semester.getId());
+                            intent.putExtra("semester_name", semester.getName());
+                            intent.putExtra("is_teacher_mode", true);
                             startActivity(intent);
                         });
+                        semesterAdapter.setSemesters(semesterList);
                         semesterRecyclerView.setAdapter(semesterAdapter);
                     }
                 });
