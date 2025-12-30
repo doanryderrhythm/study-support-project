@@ -196,16 +196,14 @@ INSERT INTO class_students (class_id, student_id) VALUES
 (8, 16); -- hs11002 Phạm Thu Quỳnh
 
 INSERT INTO class_subjects (class_id, subject_id) VALUES
--- SE114 (class_id=2): OOP, Database, Networks, Data Structures, OS
-(2, 1),   -- SE114 - Lập trình hướng đối tượng
-(2, 2),   -- SE114 - Cơ sở dữ liệu
-(2, 3),   -- SE114 - Mạng máy tính
-(2, 4),   -- SE114 - Cấu trúc dữ liệu
-(2, 5),   -- SE114 - Hệ điều hành
--- 10A1 (class_id=5): Toán, Văn, Tiếng Anh
-(5, 6),   -- 10A1 - Toán
-(5, 7),   -- 10A1 - Văn
-(5, 8);   -- 10A1 - Tiếng Anh
+-- SE114 (class_id=2): Cơ sở dữ liệu
+(2, 2),
+-- IT001 (class_id=4): Lập trình hướng đối tượng  
+(4, 1),
+-- 10A1 (class_id=5): Toán
+(5, 6),
+-- 10B1 (class_id=8): Tiếng Anh
+(8, 8);
 
 -- ===== 9. POSTS (depends on users) =====
 INSERT INTO posts (title, content, author_id, post_type, is_published, published_at) VALUES

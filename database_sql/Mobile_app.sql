@@ -89,10 +89,12 @@ CREATE TABLE class_students (
 CREATE TABLE class_subjects (
     class_id INT NOT NULL,
     subject_id INT NOT NULL,
-    PRIMARY KEY (class_id, subject_id),
+    PRIMARY KEY (class_id),
     FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
     FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
 );
+-- Note: Each class is assigned exactly ONE subject (1:1 from class perspective, enforced by PRIMARY KEY on class_id)
+-- One subject can be assigned to multiple classes (1:N relationship from subject perspective)
 
 -- Bảng phân quyền user
 CREATE TABLE user_roles (
