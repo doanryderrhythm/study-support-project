@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,6 +18,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
 
 public class StudentGradeDetailActivity extends AppCompatActivity {
@@ -49,6 +51,11 @@ public class StudentGradeDetailActivity extends AppCompatActivity {
     private int gradeIdGiuaKy;
     private int gradeIdCuoiKy;
     private int gradeIdThucHanh;
+
+    private DatabaseHelper dbHelper;
+    private int currentUserId;
+    private ImageView ivProfilePicture;
+    private TextView tvProfileName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +104,12 @@ public class StudentGradeDetailActivity extends AppCompatActivity {
         loadStudentGrades();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupNavigationViewMenu();
+    }
+
     private void initializeGradeFields() {
         try {
             // Grade input fields
@@ -135,7 +148,49 @@ public class StudentGradeDetailActivity extends AppCompatActivity {
         menuButton.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.END));
     }
 
+    private void loadAvatar(String avatarUrl) {
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            Glide.with(this).load(avatarUrl).into(ivProfilePicture);
+        } else {
+            ivProfilePicture.setImageResource(R.drawable.ic_avatar_placeholder);
+        }
+    }
+
+    private void loadUserProfile() {
+        dbHelper = new DatabaseHelper();
+        currentUserId = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+                .getInt("user_id", -1);
+        View headerView = navView.getHeaderView(0);
+        ivProfilePicture = headerView.findViewById(R.id.ivProfilePicture);
+        tvProfileName = headerView.findViewById(R.id.tvProfileName);
+
+        if (currentUserId == -1) {
+            tvProfileName.setText("Khách");
+            return;
+        }
+
+        // Load user data in background thread
+        new Thread(() -> {
+            User user = dbHelper.getUserById(currentUserId);
+
+            runOnUiThread(() -> {
+                if (user != null) {
+                    if (user.getFullName() != null && !user.getFullName().isEmpty()) {
+                        tvProfileName.setText(user.getFullName());
+                    } else {
+                        tvProfileName.setText(user.getUsername());
+                    }
+
+                    loadAvatar(user.getAvatar());
+                } else {
+                    tvProfileName.setText("Unknown user");
+                }
+            });
+        }).start();
+    }
+
     private void setupNavigationViewMenu() {
+        loadUserProfile();
         navView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
 

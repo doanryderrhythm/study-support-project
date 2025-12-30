@@ -2,6 +2,7 @@ package com.example.studysupportproject;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,13 +11,22 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,14 +35,21 @@ public class SettingsActivity extends AppCompatActivity {
     private static final String TAG = "SettingsActivity";
 
     private TextView tvUserEmail, tvUserPhone, tvUserFullName;
-    private Button btnEditProfile, btnChangePassword, btnDeleteAccount;
+    private ImageView ivUserAvatar;
+    private Button btnEditProfile, btnChangePassword, btnDeleteAccount, btnChangeAvatar;
     private ImageButton btnBack;
     private DatabaseHelper dbHelper;
     private int currentUserId;
     private User currentUser;
+    private Uri selectedImageUri;
 
     private ExecutorService executorService;
     private Handler mainHandler;
+
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
+
+    private ActivityResultLauncher<String> imagePickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +60,11 @@ public class SettingsActivity extends AppCompatActivity {
 
         executorService = Executors.newSingleThreadExecutor();
         mainHandler = new Handler(Looper.getMainLooper());
+
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
+
+        setupImagePicker();
 
         initializeViews();
         dbHelper = new DatabaseHelper();
@@ -57,11 +79,93 @@ public class SettingsActivity extends AppCompatActivity {
         setupClickListeners();
     }
 
+    private void setupImagePicker() {
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri != null) {
+                        selectedImageUri = uri;
+                        ivUserAvatar.setImageURI(uri);
+                        uploadImageToFirebase();
+                    }
+                }
+        );
+    }
+
+    private void uploadImageToFirebase() {
+        if (selectedImageUri == null) {
+            Toast.makeText(this, "Vui lòng chọn ảnh", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        showLoading(true);
+
+        String filename = "images/" + currentUserId + "_" + UUID.randomUUID().toString() + ".jpg";
+        StorageReference imageRef = storageRef.child(filename);
+
+        // Upload image
+        UploadTask uploadTask = imageRef.putFile(selectedImageUri);
+
+        uploadTask.addOnProgressListener(snapshot -> {
+            double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
+            Log.d(TAG, "Upload progress: " + progress + "%");
+        }).addOnSuccessListener(taskSnapshot -> {
+            // Get download URL
+            imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                String downloadUrl = uri.toString();
+                Log.d(TAG, "Image uploaded successfully: " + downloadUrl);
+
+                // Update database
+                updateAvatarInDatabase(downloadUrl);
+            }).addOnFailureListener(e -> {
+                Log.e(TAG, "Failed to get download URL: " + e.getMessage());
+                showLoading(false);
+                Toast.makeText(this, "Lỗi lấy URL ảnh", Toast.LENGTH_SHORT).show();
+            });
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Upload failed: " + e.getMessage());
+            showLoading(false);
+            Toast.makeText(this, "Tải ảnh lên thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void updateAvatarInDatabase(String avatarUrl) {
+        executorService.execute(() -> {
+            try {
+                boolean success = dbHelper.updateUserAvatar(currentUserId, avatarUrl);
+
+                mainHandler.post(() -> {
+                    showLoading(false);
+                    if (success) {
+                        Toast.makeText(this, "Cập nhật ảnh đại diện thành công!", Toast.LENGTH_SHORT).show();
+                        currentUser.setAvatar(avatarUrl);
+
+                        // Load new avatar
+                        Glide.with(this)
+                                .load(avatarUrl)
+                                .placeholder(R.drawable.ic_avatar_placeholder)
+                                .into(ivUserAvatar);
+                    } else {
+                        Toast.makeText(this, "Lỗi cập nhật ảnh đại diện trong database", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "Error updating avatar in database: " + e.getMessage());
+                mainHandler.post(() -> {
+                    showLoading(false);
+                    Toast.makeText(this, "Lỗi kết nối database", Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+
     private void initializeViews() {
         btnBack = findViewById(R.id.btnBackSettings);
         tvUserEmail = findViewById(R.id.tvUserEmail);
         tvUserPhone = findViewById(R.id.tvUserPhone);
         tvUserFullName = findViewById(R.id.tvUserFullName);
+        ivUserAvatar = findViewById(R.id.ivUserAvatar);
+        btnChangeAvatar = findViewById(R.id.btnChangeAvatar);
         btnEditProfile = findViewById(R.id.btnEditProfile);
         btnChangePassword = findViewById(R.id.btnChangePassword);
         btnDeleteAccount = findViewById(R.id.btnDeleteAccount);
@@ -82,6 +186,14 @@ public class SettingsActivity extends AppCompatActivity {
                                 tvUserEmail.setText(currentUser.getEmail());
                                 tvUserPhone.setText(currentUser.getPhone() != null && !currentUser.getPhone().isEmpty()
                                         ? currentUser.getPhone() : "Chưa cập nhật");
+
+                                if (currentUser.getAvatar() != null && !currentUser.getAvatar().isEmpty()) {
+                                    Glide.with(SettingsActivity.this)
+                                            .load(currentUser.getAvatar())
+                                            .placeholder(R.drawable.ic_avatar_placeholder)
+                                            .error(R.drawable.ic_avatar_placeholder)
+                                            .into(ivUserAvatar);
+                                }
                             }
                         }
                     });
@@ -98,6 +210,11 @@ public class SettingsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 finish();
             }
+        });
+
+        btnChangeAvatar.setOnClickListener(v -> {
+            // Open image picker
+            imagePickerLauncher.launch("image/*");
         });
 
         btnEditProfile.setOnClickListener(new View.OnClickListener() {
