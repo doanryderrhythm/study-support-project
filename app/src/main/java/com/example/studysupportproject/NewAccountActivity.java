@@ -1,5 +1,6 @@
 package com.example.studysupportproject;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
 import android.view.View;
@@ -13,6 +14,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class NewAccountActivity extends AppCompatActivity {
 
@@ -30,22 +35,32 @@ public class NewAccountActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_new_account);
 
-        // Ánh xạ các view - SỬA THEO ID TRONG LAYOUT
-        etUsername = findViewById(R.id.usernameEditText);
-        etEmail = findViewById(R.id.emailEditText);
-        etPassword = findViewById(R.id.newPasswordEditText);
-        etConfirmPassword = findViewById(R.id.reEnterPasswordEditText);
-        etFullName = findViewById(R.id.fullNameEditText);
-        etPhoneNumber = findViewById(R.id.phoneEditText);
-        etDateOfBirth = findViewById(R.id.dobEditText);
-        etAddress = findViewById(R.id.addressEditText);
-        btnTogglePassword = findViewById(R.id.btnTogglePassword);
-        btnToggleConfirmPassword = findViewById(R.id.btnToggleConfirmPassword);
-        btnSignUp = findViewById(R.id.signUpButton);
-        tvCreateAccount = findViewById(R.id.textViewCreateAccount); // ID ĐÚNG
 
         dbHelper = new DatabaseHelper();
 
+        initializeViews();
+        setUpListeners();
+
+        try {
+            View mainView = findViewById(R.id.main);
+            if (mainView != null) {
+                ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
+                    Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                    return insets;
+                });
+            }
+        } catch (Exception e) {
+            // Không có id main trong layout, bỏ qua
+        }
+    }
+    private void setUpListeners() {
+        etDateOfBirth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePicker();
+            }
+        });
         btnTogglePassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,20 +89,23 @@ public class NewAccountActivity extends AppCompatActivity {
                 finish(); // Quay lại màn hình đăng nhập
             }
         });
+    }
 
+    private void initializeViews() {
+        etUsername = findViewById(R.id.usernameEditText);
+        etEmail = findViewById(R.id.emailEditText);
+        etPassword = findViewById(R.id.newPasswordEditText);
+        etConfirmPassword = findViewById(R.id.reEnterPasswordEditText);
+        etFullName = findViewById(R.id.fullNameEditText);
+        etPhoneNumber = findViewById(R.id.phoneEditText);
+        etDateOfBirth = findViewById(R.id.dobEditText);
+        etAddress = findViewById(R.id.addressEditText);
+        btnTogglePassword = findViewById(R.id.btnTogglePassword);
+        btnToggleConfirmPassword = findViewById(R.id.btnToggleConfirmPassword);
+        btnSignUp = findViewById(R.id.signUpButton);
+        tvCreateAccount = findViewById(R.id.textViewCreateAccount);
 
-        try {
-            View mainView = findViewById(R.id.main);
-            if (mainView != null) {
-                ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
-                    Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                    return insets;
-                });
-            }
-        } catch (Exception e) {
-            // Không có id main trong layout, bỏ qua
-        }
+        etDateOfBirth.setFocusable(false);
     }
 
     private void togglePasswordVisibility() {
@@ -205,5 +223,33 @@ public class NewAccountActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Đăng ký thất bại", Toast.LENGTH_SHORT).show();
         }
+    }
+    private void showDatePicker() {
+        Calendar calendar = Calendar.getInstance();
+
+        // Try to parse existing date if available
+        if (!etDateOfBirth.getText().toString().isEmpty()) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                calendar.setTime(sdf.parse(etDateOfBirth.getText().toString()));
+            } catch (Exception e) {
+                // Use current date
+            }
+        }
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                (view, year, month, dayOfMonth) -> {
+                    calendar.set(Calendar.YEAR, year);
+                    calendar.set(Calendar.MONTH, month);
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                    etDateOfBirth.setText(sdf.format(calendar.getTime()));
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
+
+        datePickerDialog.show();
     }
 }

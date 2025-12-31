@@ -294,6 +294,7 @@
                 android:background="@android:color/transparent"
                 android:inputType="text"
                 android:maxLines="1"
+                android:drawableEnd="@drawable/ic_calendar"
                 android:fontFamily="sans-serif"
                 android:textColor="#333333"
                 android:textColorHint="#A0AEC0" />
