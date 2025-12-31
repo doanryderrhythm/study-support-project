@@ -278,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                     drawerLayout.closeDrawer(GravityCompat.END);
                 } else if (itemId == R.id.menu_account) {
-                    Intent intent = new Intent(MainActivity.this, AccountMenuActivity.class);
+                    Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                     startActivity(intent);
                     drawerLayout.closeDrawer(GravityCompat.END);
                 } else if (itemId == R.id.menu_logout) {
@@ -366,7 +366,7 @@ public class MainActivity extends AppCompatActivity {
         navProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AccountMenuActivity.class);
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(intent);
                 drawerLayout.closeDrawer(GravityCompat.END);
             }
