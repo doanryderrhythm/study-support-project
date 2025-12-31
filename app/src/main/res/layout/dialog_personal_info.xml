@@ -1,30 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialog_personal_info_main"
     android:layout_width="match_parent"
-    android:id="@+id/alert_label_editor_main"
     android:layout_height="match_parent">
     <LinearLayout
-        android:id="@+id/alert_label_editor_linear_layout"
+        android:id="@+id/dialog_personal_info_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="16sp">
         <TextView
-            android:id="@+id/alert_label_editor_title"
+            android:id="@+id/dialog_personal_info_title"
             android:layout_width="wrap_content"
             android:layout_height="48sp"
+            android:text="Thông tin cá nhân"
             android:textColor="@color/black"
-            android:text="placeholder_text"
             android:textSize="24sp"
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/alert_label_editor_input"
+            android:id="@+id/dialog_personal_info_name_input"
             android:layout_width="match_parent"
             android:layout_height="48sp"
+            android:inputType="textPersonName"
             android:textSize="16sp"
-            android:hint="placeholder_hint"/>
+            android:hint="Họ và tên"/>
+
+        <EditText
+            android:id="@+id/dialog_personal_info_phone_input"
+            android:layout_width="match_parent"
+            android:layout_height="48sp"
+            android:inputType="phone"
+            android:digits="1234567890+"
+            android:textSize="16sp"
+            android:hint="Số điện thoại"/>
 
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

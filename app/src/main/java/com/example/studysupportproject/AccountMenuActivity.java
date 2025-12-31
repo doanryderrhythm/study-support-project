@@ -40,6 +40,7 @@ public class AccountMenuActivity extends AppCompatActivity {
 
         initializeViews();
         setupClickListeners();
+        setupNavigationViewMenu();
     }
 
     private void initializeViews() {
@@ -82,6 +83,7 @@ public class AccountMenuActivity extends AppCompatActivity {
     }
 
     private void setupNavigationViewMenu() {
+        setupMenuButton();
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(android.view.MenuItem item) {

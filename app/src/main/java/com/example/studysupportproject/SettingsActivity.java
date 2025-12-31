@@ -1,13 +1,19 @@
 package com.example.studysupportproject;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Outline;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -20,6 +26,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.storage.FirebaseStorage;
@@ -36,8 +43,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     private TextView tvUserEmail, tvUserPhone, tvUserFullName;
     private ImageView ivUserAvatar;
-    private Button btnEditProfile, btnChangePassword, btnDeleteAccount, btnChangeAvatar;
-    private ImageButton btnBack;
+    private Button  btnChangePassword, btnDeleteAccount;
+    private ImageButton  btnEditProfile, btnChangeAvatar;
     private DatabaseHelper dbHelper;
     private int currentUserId;
     private User currentUser;
@@ -67,6 +74,7 @@ public class SettingsActivity extends AppCompatActivity {
         setupImagePicker();
 
         initializeViews();
+        setupToolbar();
         dbHelper = new DatabaseHelper();
 
         currentUserId = getSharedPreferences("UserPrefs", MODE_PRIVATE)
@@ -78,7 +86,16 @@ public class SettingsActivity extends AppCompatActivity {
 
         setupClickListeners();
     }
-
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Tài khoản");
+        }
+        ImageButton menuButton = findViewById(R.id.menu_button);
+        menuButton.setVisibility(View.GONE);
+    }
     private void setupImagePicker() {
         imagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
@@ -160,15 +177,14 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
-        btnBack = findViewById(R.id.btnBackSettings);
         tvUserEmail = findViewById(R.id.tvUserEmail);
         tvUserPhone = findViewById(R.id.tvUserPhone);
         tvUserFullName = findViewById(R.id.tvUserFullName);
         ivUserAvatar = findViewById(R.id.ivUserAvatar);
-        btnChangeAvatar = findViewById(R.id.btnChangeAvatar);
         btnEditProfile = findViewById(R.id.btnEditProfile);
         btnChangePassword = findViewById(R.id.btnChangePassword);
         btnDeleteAccount = findViewById(R.id.btnDeleteAccount);
+        btnChangeAvatar = findViewById(R.id.btnChangeAvatar);
     }
 
     private void loadUserInfo() {
@@ -205,12 +221,6 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
 
         btnChangeAvatar.setOnClickListener(v -> {
             // Open image picker
@@ -240,26 +250,17 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void showEditProfileDialog() {
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_personal_info, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Chỉnh sửa thông tin cá nhân");
+        builder.setView(dialogView);
 
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(20, 10, 20, 10);
-
-        EditText etFullName = new EditText(this);
-        etFullName.setHint("Họ và tên");
+        EditText etFullName = dialogView.findViewById(R.id.dialog_personal_info_name_input);
         etFullName.setText(currentUser.getFullName() != null ? currentUser.getFullName() : "");
-        etFullName.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
-        layout.addView(etFullName);
 
-        EditText etPhone = new EditText(this);
-        etPhone.setHint("Số điện thoại");
+        EditText etPhone = dialogView.findViewById(R.id.dialog_personal_info_phone_input);
         etPhone.setText(currentUser.getPhone() != null ? currentUser.getPhone() : "");
-        etPhone.setInputType(android.text.InputType.TYPE_CLASS_PHONE);
-        layout.addView(etPhone);
 
-        builder.setView(layout);
 
         builder.setPositiveButton("Lưu", (dialog, which) -> {
             String newFullName = etFullName.getText().toString().trim();
@@ -317,31 +318,20 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void showChangePasswordDialog() {
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_change_password, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Đổi mật khẩu");
+        builder.setView(dialogView);
 
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(20, 10, 20, 10);
 
-        EditText etCurrentPassword = new EditText(this);
-        etCurrentPassword.setHint("Mật khẩu hiện tại");
-        etCurrentPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(etCurrentPassword);
+        EditText etCurrentPassword = dialogView.findViewById(R.id.dialog_change_password_current_password_input);
 
-        EditText etNewPassword = new EditText(this);
-        etNewPassword.setHint("Mật khẩu mới");
-        etNewPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(etNewPassword);
+        EditText etNewPassword = dialogView.findViewById(R.id.dialog_change_password_new_password_input);
 
-        EditText etConfirmPassword = new EditText(this);
-        etConfirmPassword.setHint("Xác nhận mật khẩu mới");
-        etConfirmPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(etConfirmPassword);
+        EditText etConfirmPassword = dialogView.findViewById(R.id.dialog_change_password_retype_new_password_input);
 
-        builder.setView(layout);
 
-        builder.setPositiveButton("Đổi", (dialog, which) -> {
+        builder.setPositiveButton("Xác nhận", (dialog, which) -> {
             String currentPassword = etCurrentPassword.getText().toString().trim();
             String newPassword = etNewPassword.getText().toString().trim();
             String confirmPassword = etConfirmPassword.getText().toString().trim();
@@ -424,15 +414,13 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void showDeleteAccountPasswordDialog() {
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_confirm_delete_account, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Xác nhận mật khẩu");
-        builder.setMessage("Vui lòng nhập mật khẩu để xóa tài khoản");
+        builder.setView(dialogView);
 
-        EditText etPassword = new EditText(this);
-        etPassword.setHint("Mật khẩu");
-        etPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        builder.setView(etPassword);
-
+        EditText etPassword = dialogView.findViewById(R.id.dialog_confirm_delete_account_current_password_input);
+        Button btnConfirmDelete = new Button(this);
         builder.setPositiveButton("Xóa", (dialog, which) -> {
             String password = etPassword.getText().toString().trim();
 
@@ -451,7 +439,9 @@ public class SettingsActivity extends AppCompatActivity {
 
         builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
 
-        builder.show();
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+        alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(Color.parseColor("#E74C3C"));
     }
 
     private void deleteAccount() {
@@ -510,5 +500,10 @@ public class SettingsActivity extends AppCompatActivity {
         if (executorService != null && !executorService.isShutdown()) {
             executorService.shutdown();
         }
+    }
+    @Override
+    public boolean onSupportNavigateUp() {
+        getOnBackPressedDispatcher().onBackPressed();
+        return true;
     }
 }

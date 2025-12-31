@@ -2,7 +2,7 @@
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout_account_menu"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F5F5"
@@ -87,7 +87,7 @@
                         android:layout_height="48dp"
                         android:contentDescription="Settings"
                         android:src="@drawable/ic_settings"
-                        android:tint="#2196F3" />
+                        app:tint="#2196F3" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -128,7 +128,7 @@
                         android:layout_height="48dp"
                         android:contentDescription="Social"
                         android:src="@drawable/ic_share"
-                        android:tint="#FF9800" />
+                        app:tint="#FF9800" />
 
                     <TextView
                         android:layout_width="match_parent"
