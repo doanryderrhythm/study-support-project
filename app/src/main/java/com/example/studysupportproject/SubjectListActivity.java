@@ -2,10 +2,14 @@ package com.example.studysupportproject;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -56,14 +60,17 @@ public class SubjectListActivity extends AppCompatActivity {
 
         // Set edit listener for subjects
         subjectAdapter.setOnSubjectEditListener(subject -> {
-            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-            builder.setTitle("Edit Subject");
+            LayoutInflater inflater = getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.alert_label_editor, null);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setView(dialogView);
+            TextView dialogTitle = dialogView.findViewById(R.id.alert_label_editor_title);
+            dialogTitle.setText("Edit Subject");
 
-            android.widget.EditText input = new android.widget.EditText(this);
+            EditText input = dialogView.findViewById(R.id.alert_label_editor_input);
             input.setText(subject.getName());
+            input.setHint("Enter subject name");
             input.setSelection(input.getText().length());
-            input.setPadding(16, 16, 16, 16);
-            builder.setView(input);
 
             builder.setPositiveButton("Save", (dialog, which) -> {
                 String subjectName = input.getText().toString().trim();
@@ -130,13 +137,17 @@ public class SubjectListActivity extends AppCompatActivity {
         // Setup FAB
         fabAddSubject.setOnClickListener(v -> {
             // Show dialog to add new subject
+            LayoutInflater inflater = getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.alert_label_editor, null);
             android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-            builder.setTitle("Add Subject");
+            builder.setView(dialogView);
+            TextView dialogTitle = dialogView.findViewById(R.id.alert_label_editor_title);
+            dialogTitle.setText("Add Subject");
+            //builder.setTitle("Add Subject");
 
-            android.widget.EditText input = new android.widget.EditText(this);
+            EditText input = dialogView.findViewById(R.id.alert_label_editor_input);
             input.setHint("Enter subject name");
-            input.setPadding(16, 16, 16, 16);
-            builder.setView(input);
+//            input.setPadding(16, 16, 16, 16);
 
             builder.setPositiveButton("Add", (dialog, which) -> {
                 String subjectName = input.getText().toString().trim();
@@ -185,7 +196,7 @@ public class SubjectListActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 }
