@@ -11,10 +11,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.appcompat.widget.Toolbar;
 
 public class SocialNetworkSettingsActivity extends AppCompatActivity {
 
-    private ImageButton btnBack;
     private SwitchCompat swFacebook, swTwitter, swGoogle, swLinkedin;
     private Button btnSaveSettings;
     private LinearLayout socialNetworksContainer;
@@ -25,12 +25,24 @@ public class SocialNetworkSettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_social_network_settings);
 
         initializeViews();
+        setupToolbar();
         setupClickListeners();
         loadSettings();
     }
 
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Mạng xã hội");
+        }
+
+        ImageButton menuButton = findViewById(R.id.menu_button);
+        menuButton.setVisibility(View.GONE);
+    }
+
     private void initializeViews() {
-        btnBack = findViewById(R.id.btnBackSocialSettings);
         btnSaveSettings = findViewById(R.id.btnSaveSettings);
         swFacebook = findViewById(R.id.swFacebook);
         swTwitter = findViewById(R.id.swTwitter);
@@ -40,12 +52,6 @@ public class SocialNetworkSettingsActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
 
         btnSaveSettings.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,5 +74,10 @@ public class SocialNetworkSettingsActivity extends AppCompatActivity {
         // Lưu cài đặt
         Toast.makeText(this, "Cài đặt mạng xã hội đã được lưu", Toast.LENGTH_SHORT).show();
         // Có thể thêm logic lưu vào database hoặc SharedPreferences ở đây
+    }
+    @Override
+    public boolean onSupportNavigateUp() {
+        getOnBackPressedDispatcher().onBackPressed();
+        return true;
     }
 }
